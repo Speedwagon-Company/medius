@@ -22,7 +22,7 @@ with SessionLocal() as db:
     all_users = db.execute(select(User)).scalars().all()
     for user in all_users:
         print(f"{user.id}: {user.name}")
-
+# before launching bot, turn on intents, read more https://docs.discord.com/developers/events/gateway
 TOKEN = os.getenv("DIS_BOT_TOKEN")
 intents = discord.Intents.default()
 intents.message_content = True 
