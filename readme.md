@@ -4,4 +4,4 @@
 pip install -r requirements.txt
 
 запустить прожект
-python src/main.py
+python src/main.py 
