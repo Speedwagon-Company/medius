@@ -10,18 +10,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 User.metadata.create_all(bind=engine)
-db = SessionLocal()
-user = User(
-    name="Just Felix",
-)
-db.add(user)
-db.commit()
+# db = SessionLocal()
+# user = User(
+#     name="Just Felix",
+# )
+# db.add(user)
+# db.commit()
 
-with SessionLocal() as db:
+# with SessionLocal() as db:
 
-    all_users = db.execute(select(User)).scalars().all()
-    for user in all_users:
-        print(f"{user.id}: {user.name}")
+#     all_users = db.execute(select(User)).scalars().all()
+#     for user in all_users:
+#         print(f"{user.id}: {user.name}")
 # before launching bot, turn on intents, read more https://docs.discord.com/developers/events/gateway
 TOKEN = os.getenv("DIS_BOT_TOKEN")
 intents = discord.Intents.default()
