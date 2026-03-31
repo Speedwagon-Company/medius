@@ -18,7 +18,8 @@ class ConfirmStartTrade(discord.ui.View):
 
     @discord.ui.button(label='Cancel', style=discord.ButtonStyle.red)
     async def cancel_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        pass
+        await interaction.response.send_message(embed=create_suc_embed("Canceled"), ephemeral=True)
+        self.stop()
 
     async def create_ticket_channel(self, interaction: discord.Interaction, user: discord.Member) -> discord.TextChannel:
         guild = interaction.guild      
