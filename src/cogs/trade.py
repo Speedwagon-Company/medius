@@ -2,40 +2,35 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from components.buttons import Confirm
+from components.dropdowns import CryptoValueDropdownView
+from utils.dis import create_suc_embed
 
 
-
-class Trade(commands.Cog):
+class TradeCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
 
     @app_commands.command(name="starttrade", description="latency check")
-    async def start_trade(self, interaction: discord.Interaction, user_id: str):
+    async def start_trade(self, interaction: discord.Interaction, user: discord.Member):
         guild = interaction.guild
 
         try:
-            chan = await self.create_ticket_channel(interaction,user_id)
-            view = Confirm()
-            await chan.send("Select your role", view=view)
+            pass
+            view = CryptoValueDropdownView(user)
+            await interaction.response.send_message(view=view, ephemeral=True)
+            # chan = await self.create_ticket_channel(interaction,user)
+            # view = Confirm()
+            # embed = create_suc_embed("Select your role")
+            # print(embed)
+            # await chan.send(view=view,embed=embed)
             
         except Exception as err:
             print(err)
             await interaction.response.send_message("error", ephemeral=True)
         
 
-    async def create_ticket_channel(self, interaction: discord.Interaction, user_id: int) -> discord.TextChannel:
-        guild = interaction.guild      
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(view_channel=False), 
-            interaction.user: discord.PermissionOverwrite(view_channel=True, send_messages=True),
 
-        }
-        user = await self.bot.fetch_user(user_id)
-        if user:
-            overwrites[user] = discord.PermissionOverwrite(view_channel=True, send_messages=True)
-        chan: discord.TextChannel = await guild.create_text_channel("test-chan", overwrites=overwrites)
-        return chan
 
 async def setup(bot):
-    await bot.add_cog(Trade(bot))
+    await bot.add_cog(TradeCog(bot))
