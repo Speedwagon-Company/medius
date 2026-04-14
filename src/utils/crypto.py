@@ -51,7 +51,7 @@ async def subscribe_to_blocks():
                                     amount_eth = w3.from_wei(tx["value"], "ether")
                                     print(f"Входящий платеж от {tx['from']}: {amount_eth} ETH")
                                     print(f"   Хэш: {tx_hash.hex() if hasattr(tx_hash, 'hex') else tx_hash}")
-                                    TRANSACTIONS[tx["from"].lower()] = tx
+                                    TRANSACTIONS[tx["from"]] = tx
                             except Exception as e:
                                 print(f"Ошибка при получении транзакции: {e}")
                                 
@@ -61,14 +61,14 @@ async def subscribe_to_blocks():
                     
         except (ConnectionResetError, ConnectionClosedError, Exception) as e:
             print(f"Ошибка подключения: {e}")
-            print("Переподключение через 5 секунд...")
-            await asyncio.sleep(5)
+            print("Переподключение через 2 секунд...")
+            await asyncio.sleep(2)
             continue
                 
 async def wait_for_transaction(address):
     print("STARTED CHECKING")
     while True:
-        print(f"CHECING {address} {TRANSACTIONS.get(address)}")
+        # print(f"CHECING {address} {TRANSACTIONS.get(address)}")
         if TRANSACTIONS.get(address):
             print("GOT TRANSaCTION")
             return TRANSACTIONS[address]
@@ -114,11 +114,38 @@ async def send_heartbeat(w3):
 
 # ========== ПОДПИСЬ И ОТПРАВКА ==========
 # Подписываем транзакцию приватным ключом
-def sign_and_send(tx, account):
 
+# Убедитесь что W3 синхронный (не AsyncWeb3)
+def sign_and_send(amount, to):  # Убираем async
+    print("start sign", amount, to, type(to))
+    global W3
+    account = W3.eth.account.from_key(os.getenv("PRIVATE_WALLET_KEY"))
+    print("ACC", account)
+    
+    # Синхронные вызовы (без await)
+    nonce = W3.eth.get_transaction_count(account.address)
+    print("Nonce", nonce)
+    
+    gas_price = W3.eth.gas_price
+    if gas_price is None:
+        gas_price = W3.to_wei('20', 'gwei')
+    
+    chain_id = W3.eth.chain_id
+    if chain_id is None:
+        chain_id = 1
+    
+    tx = {
+        'nonce': nonce,
+        'to': to,
+        'value': W3.to_wei(amount, 'ether'),
+        'gas': 21000, 
+        'gasPrice': gas_price,
+        'chainId': chain_id
+    }
+    print("SENDING", tx)
+    
     signed_tx = account.sign_transaction(tx)
-
-    tx_hash = W3.eth.send_raw_transaction(signed_tx.raw_transaction)
+    tx_hash = W3.eth.send_raw_transaction(signed_tx.raw_transaction) 
     return tx_hash
 
 # tx_hash = sign_and_send(tx)

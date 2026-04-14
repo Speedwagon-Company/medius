@@ -73,3 +73,18 @@ class TradeSelectRoles(discord.ui.View):
             embed=embed,
             view=self
         )
+
+class ReleaseTradeMoney(discord.ui.View):
+    def __init__(self, reciever):
+        super().__init__()
+        self.value = None
+        self.reciever = reciever
+        self.released = False
+    @discord.ui.button(label='Release', style=discord.ButtonStyle.green)
+    async def release_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user == self.reciever:
+            self.released = True
+            self.stop()
+            return await interaction.response.send_message("Realeasing money")
+
+        await interaction.response.send_message("You're not a reciever", ephemeral=True) 

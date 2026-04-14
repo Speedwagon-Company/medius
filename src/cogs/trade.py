@@ -1,13 +1,13 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from components.buttons import TradeSelectRoles, Confirm
+from components.buttons import TradeSelectRoles, Confirm, ReleaseTradeMoney
 from components.dropdowns import CryptoValueDropdownView
 from utils.dis import create_suc_embed
 from enums import TradeRoles
 from web3 import Web3
 from cfg import SEND_WALLET_TRIES
-from utils.crypto import wait_for_transaction, W3
+from utils.crypto import wait_for_transaction, W3, sign_and_send
 import time
 
 
@@ -63,16 +63,24 @@ class TradeCog(commands.Cog):
                 chan.delete()
                 return
 
-            m = await chan.send(embed=create_suc_embed(f"Valid wallet {sender_wallet}", f"Now {view.roles[TradeRoles.RECIEVER].mention} \nsend money to mm wallet: 0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD  "))
-            # def reciever_check(m):
-            #     return m.author == view.roles[TradeRoles.RECIEVER]
-            # msg = await self.bot.wait_for("message", check=reciever_check)
-            # m = await chan.send("Now waiting for sender to send money to mm \n wallet: 0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD")
+            m = await chan.send(embed=create_suc_embed(f"Valid wallet {sender_wallet}", f"Now {view.roles[TradeRoles.RECIEVER].mention} \nsend your wallet  "))
+            def reciever_check(m):
+                return m.author == view.roles[TradeRoles.RECIEVER]
+            reciever_wallet = await self.bot.wait_for("message", check=reciever_check)
+            m = await chan.send(f"Now waiting  for {view.roles[TradeRoles.SENDER]} to send money to mm \nwallet: 0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD")
             tx = await wait_for_transaction(sender_wallet)
-            await m.edit(content=f"Got transaction, now waiting for it to confirm \n status: pending")
+            await m.edit(content=f"Got transaction, now waiting for it to confirm \ntransaction hash: {tx["hash"]} \n status: pending")
             recipent = W3.eth.wait_for_transaction_receipt(tx["hash"].hex())
             if recipent["status"] == 1:
-                await m.edit(content="Got transaction, now waiting for it to confirm \n status: success")
+                release_money = ReleaseTradeMoney(view.roles[TradeRoles.RECIEVER])
+                await m.edit(content="Got transaction, now waiting for it to confirm \nstatus: success", view=release_money)
+                await release_money.wait()
+                print("msg", msg.content)
+                tx = sign_and_send(0.001, msg.content)
+                msg = await chan.send(f"Sent transaction \nTransaction hash: {tx.hex()}")
+                recip = W3.eth.wait_for_transaction_receipt(tx)
+                if recip["status"] == 1:
+                    await chan.send("Transfered money to reciver")
             else:
                 await m.edit(content="Got transaction, now waiting for it to confirm \n status: failed")
             
