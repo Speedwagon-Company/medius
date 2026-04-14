@@ -6,7 +6,8 @@ import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
-
+from utils.crypto import init_w3, subscribe_to_blocks
+import asyncio
 
 load_dotenv()
 User.metadata.create_all(bind=engine)
@@ -33,7 +34,7 @@ bot = commands.Bot(command_prefix='$', intents=intents)
 @bot.event
 async def on_ready():
     print(f'logged in as {bot.user}')
-    
+
     for filename in os.listdir('./src/cogs'):
         if filename.endswith('.py') and filename != '__init__.py':
             try:
@@ -51,5 +52,12 @@ async def on_ready():
     
     print('ready')
 
+async def main():
+    init_w3()
+    
+    asyncio.create_task(subscribe_to_blocks())
+    
+    await bot.start(TOKEN)
 
-bot.run(TOKEN)
+if __name__ == "__main__":
+    asyncio.run(main())
