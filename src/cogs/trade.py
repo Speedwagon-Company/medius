@@ -15,7 +15,7 @@ class TradeCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
+    # TODO: refactor this piece of shit
     @app_commands.command(name="starttrade", description="latency check")
     async def start_trade(self, interaction: discord.Interaction, user: discord.Member):
         guild = interaction.guild
@@ -63,26 +63,26 @@ class TradeCog(commands.Cog):
                 chan.delete()
                 return
 
-            m = await chan.send(embed=create_suc_embed(f"Valid wallet {sender_wallet}", f"Now {view.roles[TradeRoles.RECIEVER].mention} \nsend your wallet  "))
+            m = await chan.send(embed=create_suc_embed(f"Valid wallet", f"Now {view.roles[TradeRoles.RECIEVER].mention} \nsend your wallet  "))
             def reciever_check(m):
                 return m.author == view.roles[TradeRoles.RECIEVER]
             reciever_wallet = await self.bot.wait_for("message", check=reciever_check)
-            m = await chan.send(f"Now waiting  for {view.roles[TradeRoles.SENDER]} to send money to mm \nwallet: 0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD")
+            m = await chan.send(embed=create_suc_embed(f"Valid wallet",f"Now waiting  for {view.roles[TradeRoles.SENDER].mention} to send money to mm \nwallet: 0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD"))
             tx = await wait_for_transaction(sender_wallet)
-            await m.edit(content=f"Got transaction, now waiting for it to confirm \ntransaction hash: {tx["hash"]} \n status: pending")
+            trans_msg = await m.channel.send(embed=create_suc_embed(f"Got transaction",f"Now waiting for it to confirm \ntransaction hash: {tx["hash"].hex()} \nstatus: pending"))
             recipent = W3.eth.wait_for_transaction_receipt(tx["hash"].hex())
             if recipent["status"] == 1:
                 release_money = ReleaseTradeMoney(view.roles[TradeRoles.RECIEVER])
-                await m.edit(content="Got transaction, now waiting for it to confirm \nstatus: success", view=release_money)
+                await trans_msg.edit(embed=create_suc_embed(f"Got transaction",f"Now waiting for it to confirm \ntransaction hash: {tx["hash"].hex()} \nstatus: success"), view=release_money)
                 await release_money.wait()
-                print("msg", msg.content)
-                tx = sign_and_send(0.001, msg.content)
-                msg = await chan.send(f"Sent transaction \nTransaction hash: {tx.hex()}")
+                print("msg", reciever_wallet.content)
+                tx = sign_and_send(0.001, reciever_wallet.content)
+                msg = await chan.send(embed=create_suc_embed(f"Sent transaction", f"Transaction hash: {tx.hex()} \nStatus: pending"))
                 recip = W3.eth.wait_for_transaction_receipt(tx)
                 if recip["status"] == 1:
-                    await chan.send("Transfered money to reciver")
+                    await msg.edit(embed=create_suc_embed(f"Sent transaction", f"Transaction hash: {tx.hex()} \nStatus: Success"))
             else:
-                await m.edit(content="Got transaction, now waiting for it to confirm \n status: failed")
+                await trans_msg.edit(content=f"Got transaction, now waiting for {view.roles[TradeRoles.RECIEVER].mention} to confirm \nstatus: failed")
             
         except Exception as err:
             print(err)

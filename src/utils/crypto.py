@@ -87,42 +87,23 @@ async def send_heartbeat(w3):
         except Exception as e:
             print(f"Heartbeat ошибка: {e}")
             break
-# ========== ПОДГОТОВКА ТРАНЗАКЦИИ ==========
-# Адрес отправителя из приватного ключа
-# account = W3.eth.account.from_key(PRIVATE_KEY)
-# sender = account.address
 
-# print(f"Отправитель: {sender}")
-# print(f"Получатель: {RECIPIENT}")
-# print(f"Сумма: {AMOUNT_ETH} ETH")
 
-# # Получаем nonce (количество транзакций от отправителя)
-# nonce = W3.eth.get_transaction_count(sender)
 
-# # Строим транзакцию
-# tx = {
-#     'nonce': nonce,
-#     'to': RECIPIENT,
-#     'value': W3.to_wei(AMOUNT_ETH, 'ether'),
-#     'gas': 21000,  # Стандартный газ для отправки ETH
-#     'gasPrice': W3.eth.gas_price,
-#     'chainId': W3.eth.chain_id
-# }
 
-# print(f"Gas price: {W3.from_wei(tx['gasPrice'], 'gwei')} Gwei")
-# print(f"Общая стоимость газа: {W3.from_wei(tx['gas'] * tx['gasPrice'], 'ether')} ETH")
 
-# ========== ПОДПИСЬ И ОТПРАВКА ==========
-# Подписываем транзакцию приватным ключом
-
-# Убедитесь что W3 синхронный (не AsyncWeb3)
-def sign_and_send(amount, to):  # Убираем async
+def sign_and_send(amount, to): 
     print("start sign", amount, to, type(to))
     global W3
     account = W3.eth.account.from_key(os.getenv("PRIVATE_WALLET_KEY"))
     print("ACC", account)
-    
-    # Синхронные вызовы (без await)
+    gas_estimate = W3.eth.estimate_gas({
+    'from': account.address,
+    'to': to,
+    'value': W3.to_wei(0.001, 'ether')
+    })
+
+    gas_price = W3.eth.generate_gas_price()
     nonce = W3.eth.get_transaction_count(account.address)
     print("Nonce", nonce)
     
@@ -138,7 +119,7 @@ def sign_and_send(amount, to):  # Убираем async
         'nonce': nonce,
         'to': to,
         'value': W3.to_wei(amount, 'ether'),
-        'gas': 21000, 
+        'gas': gas_estimate, 
         'gasPrice': gas_price,
         'chainId': chain_id
     }

@@ -8,9 +8,8 @@ class CryptoValueDropdown(discord.ui.Select):
         self.user = user 
 
         options = [
-            discord.SelectOption(label='BTC', description='', emoji='🟥'),
-            discord.SelectOption(label='Litecoin', description='', emoji='🟩'),
-            discord.SelectOption(label='Ton', description='', emoji='🟦'),
+            discord.SelectOption(label='ETH', description='', emoji='🟥'),
+
         ]
 
         super().__init__(placeholder='Choose coin', min_values=1, max_values=1, options=options)

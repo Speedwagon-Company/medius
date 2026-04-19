@@ -85,6 +85,10 @@ class ReleaseTradeMoney(discord.ui.View):
         if interaction.user == self.reciever:
             self.released = True
             self.stop()
-            return await interaction.response.send_message("Realeasing money")
+            return await interaction.response.send_message(embed=create_suc_embed("Realeasing money"))
 
         await interaction.response.send_message("You're not a reciever", ephemeral=True) 
+    
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
+    async def cancel_button(self, interaction: discord.Integration, button: discord.ui.Button):
+        self.stop()
