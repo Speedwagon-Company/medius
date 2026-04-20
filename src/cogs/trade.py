@@ -33,7 +33,6 @@ class TradeCog(commands.Cog):
             
             view = Confirm(user) 
             await interaction.followup.send(embed=embed, ephemeral=True, view=view)
-            # await interaction.followup.edit_message(message_id=msg.id embed=embed, view=view)
             await view.wait()
             chan = await self.create_ticket_channel(interaction,user)
 
@@ -44,33 +43,22 @@ class TradeCog(commands.Cog):
 
             await view.wait()
             await chan.send(embed=create_suc_embed("All Roles Selected", f"Now {view.roles[TradeRoles.SENDER].mention} send your {selected_coin} wallet"))
+            
             def sender_check(m):
                 return m.author == view.roles[TradeRoles.SENDER]
-            i = 0
-            sender_wallet = None
-            while i < SEND_WALLET_TRIES:
-                msg = await self.bot.wait_for("message", check=sender_check)
-                if Web3.is_address(msg.content):
-                    sender_wallet = msg.content
-                    break
-                else:
-                    await msg.reply("This is not correct wallet")
-                    i += 1
-            
-            if sender_wallet is None:
-                await chan.send("Too many mistakes trade is cancelled")
-                time.sleep(5)
-                chan.delete()
-                return
-
-            m = await chan.send(embed=create_suc_embed(f"Valid wallet", f"Now {view.roles[TradeRoles.RECIEVER].mention} \nsend your wallet  "))
             def reciever_check(m):
                 return m.author == view.roles[TradeRoles.RECIEVER]
-            reciever_wallet = await self.bot.wait_for("message", check=reciever_check)
+
+            sender_wallet = await self.get_wallet_in_tries(5, sender_check)
+
+            m = await chan.send(embed=create_suc_embed(f"Valid wallet", f"Now {view.roles[TradeRoles.RECIEVER].mention} \nsend your wallet  "))
+            reciever_wallet = await self.get_wallet_in_tries(5, reciever_check)
+            
             m = await chan.send(embed=create_suc_embed(f"Valid wallet",f"Now waiting  for {view.roles[TradeRoles.SENDER].mention} to send money to mm \nwallet: 0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD"))
             tx = await wait_for_transaction(sender_wallet)
             trans_msg = await m.channel.send(embed=create_suc_embed(f"Got transaction",f"Now waiting for it to confirm \ntransaction hash: {tx["hash"].hex()} \nstatus: pending"))
             recipent = W3.eth.wait_for_transaction_receipt(tx["hash"].hex())
+            
             if recipent["status"] == 1:
                 release_money = ReleaseTradeMoney(view.roles[TradeRoles.RECIEVER])
                 await trans_msg.edit(embed=create_suc_embed(f"Got transaction",f"Now waiting for it to confirm \ntransaction hash: {tx["hash"].hex()} \nstatus: success"), view=release_money)
@@ -100,6 +88,23 @@ class TradeCog(commands.Cog):
         chan: discord.TextChannel = await guild.create_text_channel("test-chan", overwrites=overwrites)
         return chan
 
+    async def get_wallet_in_tries(self, tries, checker):
+        i = 0
+        wallet = None
+        while i < tries:
+            msg = await self.bot.wait_for("message", check=checker)
+            if Web3.is_address(msg.content):
+                wallet = msg.content
+                return wallet
+            else:
+                i += 1
+                await msg.reply(f"This is not correct wallet \nLeft tries {tries - i}")
+            
+        if wallet is None:
+            await msg.reply("Too many mistakes trade is cancelled")
+            time.sleep(5)
+            await msg.channel.delete()
+            return
 
 async def setup(bot):
     await bot.add_cog(TradeCog(bot))
