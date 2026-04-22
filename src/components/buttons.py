@@ -79,11 +79,11 @@ class ReleaseTradeMoney(discord.ui.View):
         super().__init__()
         self.value = None
         self.reciever = reciever
-        self.released = False
+        self.confirmed = False
     @discord.ui.button(label='Release', style=discord.ButtonStyle.green)
     async def release_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user == self.reciever:
-            self.released = True
+            self.confirmed = True
             self.stop()
             return await interaction.response.send_message(embed=create_suc_embed("Realeasing money"))
 

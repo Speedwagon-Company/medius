@@ -1,7 +1,7 @@
 from web3 import Web3, AsyncWeb3, WebSocketProvider
 import os, asyncio
 from websockets.exceptions import ConnectionClosedError
-
+import requests, asyncio
 
 RECIPIENT = "0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD"
 TRANSACTIONS = {}
@@ -11,6 +11,7 @@ AMOUNT_ETH = 0.001
 
 
 W3: Web3 = None
+
 
 # Проверяем соединение
 def init_w3():
@@ -29,15 +30,17 @@ def init_w3():
 
 async def subscribe_to_blocks():
     print(os.getenv("CHAINSTACK_WS"))
-    while True:  # Добавляем цикл для переподключения
+    while True:  
         try:
-            async with AsyncWeb3(WebSocketProvider(os.getenv("CHAINSTACK_WS"))) as w3:
+            k_args =  {
+                'ping_interval': 30,  
+                'ping_timeout': 10    
+            }
+            async with AsyncWeb3(WebSocketProvider(os.getenv("CHAINSTACK_WS"),websocket_kwargs=k_args)) as w3:
                 MY_ADDRESS = os.getenv("OWNER_WALLET")
                 
                 sub_id = await w3.eth.subscribe("newPendingTransactions")
                 print(f"Подписка создана: {sub_id}")
-                
-                # heartbeat_task = asyncio.create_task(send_heartbeat(w3))
                 
                 try:
                     async for message in w3.socket.process_subscriptions():
@@ -60,34 +63,23 @@ async def subscribe_to_blocks():
                     raise  
                     
         except (ConnectionResetError, ConnectionClosedError, Exception) as e:
+            data = {
+            "content": f"Crypto module crashed {e}",
+            }
+
+            response = requests.post(os.getenv("WEBHOOK_URL"), json=data)
             print(f"Ошибка подключения: {e}")
             print("Переподключение через 2 секунд...")
             await asyncio.sleep(2)
             continue
                 
-async def wait_for_transaction(address):
+async def wait_for_transaction(tx_hash):
     print("STARTED CHECKING")
     while True:
-        # print(f"CHECING {address} {TRANSACTIONS.get(address)}")
-        if TRANSACTIONS.get(address):
+        if TRANSACTIONS.get(tx_hash):
             print("GOT TRANSaCTION")
-            return TRANSACTIONS[address]
+            return TRANSACTIONS[tx_hash]
         await asyncio.sleep(1)
-
-async def send_heartbeat(w3):
-    while True:
-        try:
-            await asyncio.sleep(10)
-            if hasattr(w3, 'socket') and w3.socket:
-                # Правильный способ отправки через WebSocket
-                await w3.socket.send('ping', None)  # или ('ping', [])
-                print("💓 Heartbeat отправлен")
-        except asyncio.CancelledError:
-            break
-        except Exception as e:
-            print(f"Heartbeat ошибка: {e}")
-            break
-
 
 
 

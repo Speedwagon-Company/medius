@@ -1,16 +1,14 @@
-from sqlalchemy import select
-from models.User import User
-from db import engine, SessionLocal
+
 from datetime import date
 import discord
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
 from utils.crypto import init_w3, subscribe_to_blocks
-import asyncio
+import asyncio, requests, db
+from db import Transaction, create_transaction, update_transaction_status
 
 load_dotenv()
-User.metadata.create_all(bind=engine)
 # db = SessionLocal()
 # user = User(
 #     name="Just Felix",
@@ -53,11 +51,15 @@ async def on_ready():
     print('ready')
 
 async def main():
-    init_w3()
-    
-    asyncio.create_task(subscribe_to_blocks())
-    
-    await bot.start(TOKEN)
+    # init_w3()
+    await db.init_db()
+    # asyncio.create_task(subscribe_to_blocks())
+    try:
+        transaction: Transaction = await create_transaction("sender_wallet", "reciever_wallet", None, 1, 2, "уер", 1)
+        print(transaction)
+    except Exception as e:
+        print(e)
+    # await bot.start(TOKEN)
 
 if __name__ == "__main__":
     asyncio.run(main())
