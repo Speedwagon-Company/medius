@@ -2,12 +2,16 @@
 from datetime import date
 import discord
 from discord.ext import commands
-import os
+import os, logging, traceback
 from dotenv import load_dotenv
-from utils.crypto import init_w3, subscribe_to_blocks
+from utils.crypto import init_w3, subscribe_to_blocks, handle_pending_transactions
 import asyncio, requests, db
-from db import Transaction, create_transaction, update_transaction_status
-
+from db import Transaction, create_transaction, update_transaction_status 
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+# )
+# logger = logging.getLogger(__name__)
 load_dotenv()
 # db = SessionLocal()
 # user = User(
@@ -51,15 +55,21 @@ async def on_ready():
     print('ready')
 
 async def main():
-    # init_w3()
+    init_w3()
     await db.init_db()
     # asyncio.create_task(subscribe_to_blocks())
+    # loop = asyncio.get_event_loop()
+    # while True:
     try:
-        transaction: Transaction = await create_transaction("sender_wallet", "reciever_wallet", None, 1, 2, "уер", 1)
-        print(transaction)
+        await handle_pending_transactions()
     except Exception as e:
         print(e)
-    # await bot.start(TOKEN)
+    # try:
+    #     transaction: Transaction = await create_transaction("sender_wallet", "reciever_wallet", None, 1, 2, "уер", 1)
+    #     print(transaction)
+    # except Exception as e:
+    #     print(e)
+    await bot.start(TOKEN)
 
 if __name__ == "__main__":
     asyncio.run(main())

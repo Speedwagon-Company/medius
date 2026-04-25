@@ -2,6 +2,10 @@ from web3 import Web3, AsyncWeb3, WebSocketProvider
 import os, asyncio
 from websockets.exceptions import ConnectionClosedError
 import requests, asyncio
+from web3.exceptions import TransactionNotFound
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading, json, time, websockets
+
 
 RECIPIENT = "0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD"
 TRANSACTIONS = {}
@@ -28,6 +32,7 @@ def init_w3():
     print(f"Подключено к сети: {W3.eth.chain_id}")
     print(f"Баланс ноды: {W3.eth.get_balance(W3.eth.account.from_key(PRIVATE_KEY).address)} Wei")
 
+# TODO: refactor, source: https://docs.chainstack.com/docs/monitoring-transaction-propagation-from-node-to-mempool-in-evm-networks-with-python  
 async def subscribe_to_blocks():
     print(os.getenv("CHAINSTACK_WS"))
     while True:  
@@ -72,7 +77,81 @@ async def subscribe_to_blocks():
             print("Переподключение через 2 секунд...")
             await asyncio.sleep(2)
             continue
+
+
+async def handle_pending_transactions():
+    WALLET_TO_WATCH = Web3.to_checksum_address("0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD")
+    
+    ws_url = os.getenv("CHAINSTACK_WS")
+    http_url = ws_url.replace("wss://", "https://") if ws_url else None
+    
+    if not http_url:
+        print("Ошибка: CHAINSTACK_WS не задан")
+        return
+    
+    global W3
+    
+    if not W3.is_connected():
+        print(f"Не удалось подключиться к узлу: {http_url}")
+        return
+    
+    print(f"Подключено к узлу")
+
+    last_block = W3.eth.block_number
+    print(f"Текущий блок: {last_block}")
+    
+    while True:
+        try:
+            current_block = W3.eth.block_number
+            
+            if current_block > last_block:
+                print(f"Новые блоки: {last_block + 1} -> {current_block}")
                 
+
+                for block_num in range(last_block + 1, current_block + 1):
+                    try:
+                        block = W3.eth.get_block(block_num, full_transactions=True)
+                        
+                        for tx in block.transactions:
+                            from_addr = tx['from'].lower()
+                            to_addr = tx['to'].lower() if tx.get('to') else None
+                            target = WALLET_TO_WATCH.lower()
+
+                            if from_addr == target or (to_addr and to_addr == target):
+                                direction = "📤 ИСХОДЯЩАЯ" if from_addr == target else "📥 ВХОДЯЩАЯ"
+                                value_eth = W3.from_wei(tx['value'], 'ether')
+                                TRANSACTIONS[tx["from"]] = tx
+                                print(f"\n🔔 Найдена {direction} транзакция в блоке {block_num}!")
+                                print(f"Хэш: {tx.hash.hex()}")
+                                print(f"От: {tx['from']}")
+                                print(f"Кому: {tx['to']}")
+                                print(f"Value: {value_eth} ETH")
+                                print("-" * 50)
+                                
+                    except Exception as e:
+                        print(f"Ошибка в блоке {block_num}: {e}")
+                
+                last_block = current_block
+            
+
+            await asyncio.sleep(12)
+            
+        except Exception as e:
+            print(f" Ошибка: {e}")
+            await asyncio.sleep(1)
+
+
+def check_pending_transaction(tx_hash, target_address_lower, w3):
+  try:
+    tx = w3.eth.get_transaction(tx_hash)
+    if tx['from'].lower() == target_address_lower or (
+        tx['to'] and tx['to'].lower() == target_address_lower):
+      return tx
+  except TransactionNotFound:
+    pass
+  return None
+
+
 async def wait_for_transaction(tx_hash):
     print("STARTED CHECKING")
     while True:
@@ -121,17 +200,3 @@ def sign_and_send(amount, to):
     tx_hash = W3.eth.send_raw_transaction(signed_tx.raw_transaction) 
     return tx_hash
 
-# tx_hash = sign_and_send(tx)
-# print(f"✅ Транзакция отправлена!")
-# print(f"📝 Хэш транзакции: {tx_hash.hex()}")
-
-# # Ждем подтверждения (опционально, но полезно)
-# print("⏳ Ожидание подтверждения...")
-# receipt = W3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
-
-# if receipt['status'] == 1:
-#     print("✅ Транзакция успешно подтверждена!")
-#     print(f"🔗 Блок: {receipt['blockNumber']}")
-#     print(f"💰 Газ использовано: {receipt['gasUsed']}")
-# else:
-#     print("❌ Транзакция не удалась!")

@@ -60,7 +60,7 @@ class TradeCog(commands.Cog):
             reciever_wallet = await self.get_wallet_in_tries(5, reciever_check)
             
             m = await chan.send(embed=create_suc_embed(f"Valid wallet",f"Now waiting  for {view.roles[TradeRoles.SENDER].mention} to send money to mm \nwallet: 0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD"))
-            transaction: Transaction = await create_transaction(sender_wallet, reciever_wallet, None, sender.id, reciever.id, selected_coin)
+            transaction: Transaction = await create_transaction(sender_wallet, reciever_wallet, None, 1, 2, selected_coin, 1)
             await send_transaction_log(guild, create_suc_embed("Created transaction", f"Transaction id: {transaction.id}"))
             tx = await wait_for_transaction(sender_wallet)
             trans_msg = await m.channel.send(embed=create_suc_embed(f"Got transaction",f"Now waiting for it to confirm \ntransaction hash: {tx["hash"].hex()} \nstatus: pending"))
