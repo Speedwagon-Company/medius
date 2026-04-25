@@ -1,5 +1,10 @@
 from enum import Enum
 
+
 class TradeRoles(Enum):
-    RECIEVER = "reciever"
-    SENDER = "sender"
+    BUYER = "buyer"
+    SELLER = "seller"
+
+    # Legacy aliases kept for existing code compatibility.
+    SENDER = "buyer"
+    RECIEVER = "seller"

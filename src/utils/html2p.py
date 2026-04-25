@@ -1,7 +1,4 @@
-import sys
-import os
 from html2pic import Html2Pic
-
 
 profileHtml = '''
     <div class="profile-card">

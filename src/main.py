@@ -1,75 +1,51 @@
+from __future__ import annotations
 
-from datetime import date
+import asyncio
+import os
+
 import discord
 from discord.ext import commands
-import os, logging, traceback
 from dotenv import load_dotenv
-from utils.crypto import init_w3, subscribe_to_blocks, handle_pending_transactions
-import asyncio, requests, db
-from db import Transaction, create_transaction, update_transaction_status 
-# logging.basicConfig(
-#     level=logging.DEBUG,
-#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-# )
-# logger = logging.getLogger(__name__)
+
+import db
+from payments.factory import get_payment_provider
+from settings import load_settings
+
 load_dotenv()
-# db = SessionLocal()
-# user = User(
-#     name="Just Felix",
-# )
-# db.add(user)
-# db.commit()
+settings = load_settings()
 
-# with SessionLocal() as db:
-
-#     all_users = db.execute(select(User)).scalars().all()
-#     for user in all_users:
-#         print(f"{user.id}: {user.name}")
-# before launching bot, turn on intents, read more https://docs.discord.com/developers/events/gateway
-TOKEN = os.getenv("DIS_BOT_TOKEN")
 intents = discord.Intents.default()
-intents.message_content = True 
+intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix='$', intents=intents)
+bot = commands.Bot(command_prefix="$", intents=intents)
+
 
 @bot.event
 async def on_ready():
-    print(f'logged in as {bot.user}')
+    print(f"logged in as {bot.user}")
 
-    for filename in os.listdir('./src/cogs'):
-        if filename.endswith('.py') and filename != '__init__.py':
+    for filename in os.listdir("./src/cogs"):
+        if filename.endswith(".py") and filename != "__init__.py":
             try:
-                await bot.load_extension(f'cogs.{filename[:-3]}')
-                print(f'loaded cog: {filename}')
-            except Exception as e:
-                print(f'failed to load cog {filename}: {e}')
-    
-    # try:
-    #     synced = await bot.tree.sync()
-    #     print(f"synced {len(synced)} slash commands")
-        
-    # except Exception as e:
-    #     print(f"failed to sync commands: {e}")
-    
-    print('ready')
+                await bot.load_extension(f"cogs.{filename[:-3]}")
+                print(f"loaded cog: {filename}")
+            except Exception as err:
+                print(f"failed to load cog {filename}: {err}")
 
-async def main():
-    init_w3()
-    await db.init_db()
-    # asyncio.create_task(subscribe_to_blocks())
-    # loop = asyncio.get_event_loop()
-    # while True:
+    print("ready")
+
+
+async def main() -> None:
+    settings.validate()
+    get_payment_provider(settings)
+    await db.init_db(settings.database_url)
+
     try:
-        await handle_pending_transactions()
-    except Exception as e:
-        print(e)
-    # try:
-    #     transaction: Transaction = await create_transaction("sender_wallet", "reciever_wallet", None, 1, 2, "уер", 1)
-    #     print(transaction)
-    # except Exception as e:
-    #     print(e)
-    await bot.start(TOKEN)
+        await bot.start(settings.discord_token)
+    finally:
+        await db.close_db()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

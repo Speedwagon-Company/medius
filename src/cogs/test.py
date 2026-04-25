@@ -1,6 +1,7 @@
 import discord
-from discord.ext import commands
 from discord import app_commands
+from discord.ext import commands
+
 
 class Commands(commands.Cog):
     def __init__(self, bot):
@@ -9,7 +10,7 @@ class Commands(commands.Cog):
     @app_commands.command(name="ping", description="latency check")
     async def ping(self, interaction: discord.Interaction):
         latency = round(self.bot.latency * 1000)
-        await interaction.response.send_message(f"ping {latency}ms хуйс")
+        await interaction.response.send_message(f"pong {latency}ms")
 
 
 

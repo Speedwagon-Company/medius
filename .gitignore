@@ -2,3 +2,11 @@ __pycache__/
 .env
 test.db
 venv/
+.venv/
+bot.db
+bot.db-shm
+bot.db-wal
+graphify-out/
+.graphify_detect.json
+.codex/
+*.sqlite3
