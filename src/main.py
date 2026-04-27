@@ -4,10 +4,8 @@ import discord
 from discord.ext import commands
 import os, logging, traceback
 from dotenv import load_dotenv
-from utils.crypto import init_w3, subscribe_to_blocks, handle_pending_transactions
+from utils.crypto import init_w3, subscribe_to_blocks, context_manager_subscription_example
 import asyncio, requests, db
-from db import Transaction, create_transaction, update_transaction_status 
-# logging.basicConfig(
 #     level=logging.DEBUG,
 #     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 # )
@@ -57,19 +55,25 @@ async def on_ready():
 async def main():
     init_w3()
     await db.init_db()
-    # asyncio.create_task(subscribe_to_blocks())
-    # loop = asyncio.get_event_loop()
-    # while True:
+    asyncio.create_task(bot.start(TOKEN))
     try:
-        await handle_pending_transactions()
+
+        await context_manager_subscription_example()
     except Exception as e:
         print(e)
+    # while True:
+    #     pass
+    # loop = asyncio.get_event_loop()
+    # while True:
+    # try:
+    #     await handle_pending_transactions()
+    # except Exception as e:
+    #     print(e)
     # try:
     #     transaction: Transaction = await create_transaction("sender_wallet", "reciever_wallet", None, 1, 2, "уер", 1)
     #     print(transaction)
     # except Exception as e:
     #     print(e)
-    await bot.start(TOKEN)
 
 if __name__ == "__main__":
     asyncio.run(main())

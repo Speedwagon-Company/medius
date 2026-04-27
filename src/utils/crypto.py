@@ -141,6 +141,28 @@ async def handle_pending_transactions():
             await asyncio.sleep(1)
 
 
+async def context_manager_subscription_example():
+    #  async with AsyncWeb3(AsyncIPCProvider("./path/to.filename.ipc") as w3:  # for the AsyncIPCProvider
+    async with AsyncWeb3(WebSocketProvider(os.getenv("CHAINSTACK_WS"))) as w3:  # for the WebSocketProvider
+        # subscribe to new block headers
+        subscription_id = await w3.eth.subscribe("newPendingTransactions", True)
+
+        async for response in w3.socket.process_subscriptions():
+            res = response["result"]
+            if res["to"] == "0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD":
+                TRANSACTIONS[res["from"]] = res
+                print(f"got transaction {response}\n")
+            # handle responses here
+
+
+        # still an open connection, make any other requests and get
+        # responses via send / receive
+        latest_block = await w3.eth.get_block("latest")
+        print(f"Latest block: {latest_block}")
+
+        # the connection closes automatically when exiting the context
+        # manager (the `async with` block)
+
 def check_pending_transaction(tx_hash, target_address_lower, w3):
   try:
     tx = w3.eth.get_transaction(tx_hash)
