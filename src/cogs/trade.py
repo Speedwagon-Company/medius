@@ -8,8 +8,8 @@ from enums import TradeRoles
 from web3 import Web3
 from cfg import SEND_WALLET_TRIES
 from utils.crypto import wait_for_transaction, W3, sign_and_send
-from db import create_trade, create_transaction, Transaction
-import time
+from db import create_trade, create_transaction, Transaction, update_transaction, update_transaction_status
+import time, asyncio
 from utils.logs import send_transaction_log
 
 
@@ -36,6 +36,8 @@ class TradeCog(commands.Cog):
             view = Confirm(user) 
             await interaction.followup.send(embed=embed, ephemeral=True, view=view)
             await view.wait()
+            if not view.confirmed:
+                return
             chan = await self.create_ticket_channel(interaction,user)
             print(await create_trade(interaction.user.id, user.id))# create here
             view = TradeSelectRoles([interaction.user, user], selected_coin)
@@ -44,6 +46,9 @@ class TradeCog(commands.Cog):
             await chan.send(view=view,embed=embed)
 
             await view.wait()
+            if view.canceled:
+                await asyncio.sleep(10)
+                await chan.delete()
             roles = view.roles
             await chan.send(embed=create_suc_embed("All Roles Selected", f"Now {view.roles[TradeRoles.SENDER].mention} send your {selected_coin} wallet"))
             sender: discord.Member = roles[TradeRoles.SENDER]
@@ -69,19 +74,22 @@ class TradeCog(commands.Cog):
             tx = await wait_for_transaction(sender_wallet)
             print("CONTINUE?")
             trans_msg = await m.channel.send(embed=create_suc_embed(f"Got transaction",f"Now waiting for it to confirm \ntransaction hash: {tx["hash"].hex()} \nstatus: pending"))
-            recipent = W3.eth.wait_for_transaction_receipt(tx["hash"].hex())
+            recipent = await W3.eth.wait_for_transaction_receipt(tx["hash"].hex())
+            transaction_info = await W3.eth.get_transaction(tx["hash"].hex())
             
+            print(transaction_info)
+            value = Web3.from_wei(transaction_info["value"], "ether")
             if recipent["status"] == 1:
-                # await update_transaction_status(transaction.id, "CONFIRMED")
+                await update_transaction_status(transaction.id, "CONFIRMED")
                 release_money = ReleaseTradeMoney(view.roles[TradeRoles.RECIEVER])
                 await send_transaction_log(guild, create_suc_embed("Updated transaction", f"Transaction id: {transaction.id} \nTransaction hash: {transaction.hash} \nTransaction status: {transaction.status}"))
-                await trans_msg.edit(embed=create_suc_embed(f"Got transaction",f"Now waiting for it to confirm \ntransaction hash: {tx["hash"].hex()} \nstatus: success"), view=release_money)
+                await trans_msg.edit(embed=create_suc_embed(f"Got transaction",f"Now waiting for it to confirm \ntransaction hash: {tx["hash"].hex()} \n{selected_coin} recieved: {value} \nstatus: success"), view=release_money)
                 await release_money.wait()
                 if not release_money.confirmed:
-                    self.handle_cancel_money()
+                    await self.handle_cancel_money(value, sender_wallet, chan)
                     return
                 
-                await self.handle_confirm_money(reciever_wallet, chan)
+                await self.handle_confirm_money(value,reciever_wallet, chan)
                 # print("msg", reciever_wallet.content)
                 # tx = sign_and_send(0.001, reciever_wallet.content)
                 # msg = await chan.send(embed=create_suc_embed(f"Sent transaction", f"Transaction hash: {tx.hex()} \nStatus: pending"))
@@ -93,7 +101,9 @@ class TradeCog(commands.Cog):
                 await trans_msg.edit(content=f"Got transaction, now waiting for {view.roles[TradeRoles.RECIEVER].mention} to confirm \nstatus: failed")
             
         except Exception as err:
-            print(err)
+            print(f"Тип ошибки: {type(err).__name__}")
+            print(f"Текст ошибки: {err}")
+            print(f"Где произошло: {err.__traceback__.tb_frame.f_code.co_name}")
             # await interaction.response.send_message("error", ephemeral=True)
     async def create_ticket_channel(self, interaction: discord.Interaction, user: discord.Member) -> discord.TextChannel:
         guild = interaction.guild      
@@ -126,15 +136,22 @@ class TradeCog(commands.Cog):
             await msg.channel.delete()
             return
 
-    async def handle_cancel_money(self, sender_wallet, chan: discord.TextChannel):
+    async def handle_cancel_money(self, value,sender_wallet, chan: discord.TextChannel):
         await chan.send(embed=create_suc_embed("Sender canceled deal, transfering money to him"))
-
-
-    async def handle_confirm_money(self, reciever_wallet, chan):
-        print("msg", reciever_wallet)
-        tx = sign_and_send(0.001, reciever_wallet)
+        tx = await sign_and_send(value, sender_wallet)
+        print("@@@", tx, value, sender_wallet)
         msg = await chan.send(embed=create_suc_embed(f"Sent transaction", f"Transaction hash: {tx.hex()} \nStatus: pending"))
-        recip = W3.eth.wait_for_transaction_receipt(tx)
+        recip = await asyncio.wait_for(W3.eth.wait_for_transaction_receipt(tx), 120)
+        print("after", recip)
+        if recip["status"] == 1:
+            await msg.edit(embed=create_suc_embed(f"Sent transaction", f"Transaction hash: {tx.hex()} \nStatus: Success"))
+
+
+    async def handle_confirm_money(self, value,reciever_wallet, chan):
+        print("msg", reciever_wallet)
+        tx = await sign_and_send(value, reciever_wallet)
+        msg = await chan.send(embed=create_suc_embed(f"Sent transaction", f"Transaction hash: {tx.hex()} \nStatus: pending"))
+        recip = await asyncio.wait_for(W3.eth.wait_for_transaction_receipt(tx), 120)
         if recip["status"] == 1:
             await msg.edit(embed=create_suc_embed(f"Sent transaction", f"Transaction hash: {tx.hex()} \nStatus: Success"))
 

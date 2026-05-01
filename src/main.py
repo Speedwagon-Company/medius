@@ -53,7 +53,7 @@ async def on_ready():
     print('ready')
 
 async def main():
-    init_w3()
+    await init_w3()
     await db.init_db()
     asyncio.create_task(bot.start(TOKEN))
     try:

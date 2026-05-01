@@ -49,6 +49,11 @@ class Transaction(Base):
     reciever_id: Mapped[int] = mapped_column(ForeignKey("users.discord_id"))
     sender_id: Mapped[int] = mapped_column(ForeignKey("users.discord_id"))
 
+    reciever_wallet: Mapped[str] = mapped_column()
+    sender_wallet: Mapped[str] = mapped_column()
+
+    recieved: Mapped[float] = mapped_column()
+
     hash: Mapped[str] = mapped_column(nullable=True)
     coin: Mapped[str] = mapped_column(nullable=False)
 
@@ -80,4 +85,20 @@ async def update_transaction_status(transaction_id, new_status):
         
         trans.status = new_status
         await session.commit()
+        return trans
+    
+async def update_transaction(transaction_id, **kwargs):
+    async with AsyncSession() as session:
+        trans = await session.get(Transaction, transaction_id)
+        if not trans:
+            raise EntityNotFoundError(f"transaction with id {transaction_id} not found")
+        
+        for key, value in kwargs.items():
+            if hasattr(trans, key):
+                setattr(trans, key, value)
+        
+        session.add(trans)
+        await session.commit()
+        await session.refresh(trans)  
+        
         return trans

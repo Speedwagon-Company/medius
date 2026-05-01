@@ -1,4 +1,4 @@
-from web3 import Web3, AsyncWeb3, WebSocketProvider
+from web3 import Web3, AsyncWeb3, WebSocketProvider,AsyncHTTPProvider
 import os, asyncio
 from websockets.exceptions import ConnectionClosedError
 import requests, asyncio
@@ -14,23 +14,23 @@ TRANSACTIONS = {}
 AMOUNT_ETH = 0.001
 
 
-W3: Web3 = None
+W3: AsyncWeb3 = None
 
 
 # Проверяем соединение
-def init_w3():
+async def init_w3():
     global W3
     PRIVATE_KEY = os.getenv("PRIVATE_WALLET_KEY")
     RPC_URL = os.getenv("RPC_URL")
-    W3 = Web3(Web3.HTTPProvider(RPC_URL))
+    W3 = AsyncWeb3(AsyncHTTPProvider(RPC_URL))
 
-    if not W3.is_connected():
+    if not await W3.is_connected():
         print("❌ Не удалось подключиться к Chainstack ноде")
         print("Проверь RPC URL и интернет соединение")
         exit(1)
 
-    print(f"Подключено к сети: {W3.eth.chain_id}")
-    print(f"Баланс ноды: {W3.eth.get_balance(W3.eth.account.from_key(PRIVATE_KEY).address)} Wei")
+    print(f"Подключено к сети: {await W3.eth.chain_id}")
+    print(f"Баланс ноды: {await W3.eth.get_balance(W3.eth.account.from_key(PRIVATE_KEY).address)} Wei")
 
 # TODO: refactor, source: https://docs.chainstack.com/docs/monitoring-transaction-propagation-from-node-to-mempool-in-evm-networks-with-python  
 async def subscribe_to_blocks():
@@ -185,26 +185,26 @@ async def wait_for_transaction(tx_hash):
 
 
 
-def sign_and_send(amount, to): 
+async def sign_and_send(amount: float, to: str):
     print("start sign", amount, to, type(to))
-    global W3
+    
     account = W3.eth.account.from_key(os.getenv("PRIVATE_WALLET_KEY"))
-    print("ACC", account)
-    gas_estimate = W3.eth.estimate_gas({
-    'from': account.address,
-    'to': to,
-    'value': W3.to_wei(0.001, 'ether')
+    print("ACC", account.address)
+    
+    gas_estimate = await W3.eth.estimate_gas({
+        'from': account.address,
+        'to': to,
+        'value': W3.to_wei(amount, 'ether')  
     })
-
-    gas_price = W3.eth.generate_gas_price()
-    nonce = W3.eth.get_transaction_count(account.address)
+    
+    gas_price = await W3.eth.gas_price
+    if gas_price is None:
+        gas_price = await W3.to_wei('20', 'gwei')
+    
+    nonce = await W3.eth.get_transaction_count(account.address)
     print("Nonce", nonce)
     
-    gas_price = W3.eth.gas_price
-    if gas_price is None:
-        gas_price = W3.to_wei('20', 'gwei')
-    
-    chain_id = W3.eth.chain_id
+    chain_id = await W3.eth.chain_id
     if chain_id is None:
         chain_id = 1
     
@@ -212,13 +212,14 @@ def sign_and_send(amount, to):
         'nonce': nonce,
         'to': to,
         'value': W3.to_wei(amount, 'ether'),
-        'gas': gas_estimate, 
+        'gas': gas_estimate,
         'gasPrice': gas_price,
         'chainId': chain_id
     }
     print("SENDING", tx)
     
     signed_tx = account.sign_transaction(tx)
-    tx_hash = W3.eth.send_raw_transaction(signed_tx.raw_transaction) 
+    
+    tx_hash = await W3.eth.send_raw_transaction(signed_tx.raw_transaction)
+    
     return tx_hash
-

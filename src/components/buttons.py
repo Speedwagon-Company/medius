@@ -35,6 +35,7 @@ class TradeSelectRoles(discord.ui.View):
         self.selectedCoin = selectedCoin
         self.roles = {}
         self.members = members
+        self.canceled = False
 
     @discord.ui.button(label='Receiver', style=discord.ButtonStyle.green)
     async def receiver_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -59,7 +60,12 @@ class TradeSelectRoles(discord.ui.View):
             return await interaction.response.send_message("You already choose your role", ephemeral=True)
         await self.handle_inter(interaction)
 
-    
+    @discord.ui.button(label='Cancel', style=discord.ButtonStyle.red)
+    async def cancel_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.canceled = True
+        self.stop()
+        await interaction.channel.send(embed=create_suc_embed(f"Trade canceled by {interaction.user.mention}", "Deleting channel in 10 seconds"))
+
     async def handle_inter(self, interaction: discord.Interaction):
         sender = self.roles.get(TradeRoles.SENDER, 'Not selected')
         receiver = self.roles.get(TradeRoles.RECIEVER, 'Not selected')
