@@ -80,7 +80,7 @@ async def create_transaction(**kwargs):
     
 async def update_transaction_status(transaction_id, new_status):
     async with AsyncSessionFactory() as session:
-        trans = session.get(Transaction, transaction_id)
+        trans = await session.get(Transaction, transaction_id)
         if not trans:
             raise EntityNotFoundError(f"transaction with id {transaction_id} not found")
         

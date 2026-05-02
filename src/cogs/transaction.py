@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-
+from utils.crypto import W3
 from db import get_transaction_by_hash
 
 
@@ -40,7 +40,7 @@ class TransactionCog(commands.Cog):
     @app_commands.describe(tx_hash="Blockchain transaction hash")
     async def info(self, interaction: discord.Interaction, tx_hash: str):
         normalized_hash = tx_hash.strip()
-        transaction = await get_transaction_by_hash(normalized_hash)
+        transaction_db = await get_transaction_by_hash(normalized_hash)
 
         if not transaction:
             await interaction.response.send_message(
@@ -48,7 +48,7 @@ class TransactionCog(commands.Cog):
                 ephemeral=True,
             )
             return
-
+        transaction = await W3.eth.get_transaction(tx_hash)
         explorer_url = self._build_explorer_url(transaction.hash, transaction.network, transaction.coin)
         status = (transaction.status or "UNKNOWN").title()
         network_value = transaction.network or "Unknown"
@@ -59,7 +59,7 @@ class TransactionCog(commands.Cog):
         )
         embed.add_field(
             name="Transaction Hash",
-            value=f"[{transaction.hash}]({explorer_url})",
+            value=f"[{tx_hash}]({explorer_url})",
             inline=False,
         )
         embed.add_field(name="Status", value=status, inline=True)
@@ -67,7 +67,7 @@ class TransactionCog(commands.Cog):
             name="Crypto Details",
             value=(
                 f"Amount: `{transaction.recieved}`\n"
-                f"Network/Coin: `{network_value}` / `{transaction.coin}`"
+                f"Network/Coin: `{network_value}` / `{transaction_db.coin}`"
             ),
             inline=True,
         )
