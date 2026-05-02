@@ -142,8 +142,12 @@ async def handle_pending_transactions():
 
 
 async def context_manager_subscription_example():
+    k_args =  {
+        'ping_interval': 30,  
+        'ping_timeout': 10    
+    }
     #  async with AsyncWeb3(AsyncIPCProvider("./path/to.filename.ipc") as w3:  # for the AsyncIPCProvider
-    async with AsyncWeb3(WebSocketProvider(os.getenv("CHAINSTACK_WS"))) as w3:  # for the WebSocketProvider
+    async with AsyncWeb3(WebSocketProvider(os.getenv("CHAINSTACK_WS"), websocket_kwargs=k_args)) as w3:  # for the WebSocketProvider
         # subscribe to new block headers
         subscription_id = await w3.eth.subscribe("newPendingTransactions", True)
 
@@ -174,12 +178,14 @@ def check_pending_transaction(tx_hash, target_address_lower, w3):
   return None
 
 
-async def wait_for_transaction(tx_hash):
+async def wait_for_transaction(wallet):
     print("STARTED CHECKING")
     while True:
-        if TRANSACTIONS.get(tx_hash):
+        if TRANSACTIONS.get(wallet):
             print("GOT TRANSaCTION")
-            return TRANSACTIONS[tx_hash]
+            res = TRANSACTIONS[wallet]
+            del TRANSACTIONS[wallet]
+            return res
         await asyncio.sleep(1)
 
 

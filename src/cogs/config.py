@@ -2,7 +2,10 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from db import get_command_setting, upsert_command_setting
+from cogs.config_repository import (
+    CommandSettingsRepository,
+    ensure_command_settings_table,
+)
 
 
 class ConfigCog(commands.Cog):
@@ -33,7 +36,7 @@ class ConfigCog(commands.Cog):
             )
             return
 
-        setting = await upsert_command_setting(
+        setting = await CommandSettingsRepository.upsert_command_setting(
             guild_id=guild.id,
             command_name=command_name,
             enabled=enabled,
@@ -56,7 +59,7 @@ class ConfigCog(commands.Cog):
             )
             return
 
-        setting = await get_command_setting(guild.id, command_name)
+        setting = await CommandSettingsRepository.get_command_setting(guild.id, command_name)
         if setting is None:
             await interaction.response.send_message(
                 "No config found for this command in current server.",
@@ -75,4 +78,5 @@ class ConfigCog(commands.Cog):
 
 
 async def setup(bot):
+    await ensure_command_settings_table()
     await bot.add_cog(ConfigCog(bot))

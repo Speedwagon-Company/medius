@@ -1,8 +1,6 @@
 import sqlite3
 
 DB_PATH = "bot.db"
-TABLE_NAME = "command_settings"
-INDEX_NAME = "ix_command_settings_guild_id"
 
 
 def migrate() -> None:
@@ -10,8 +8,8 @@ def migrate() -> None:
     try:
         cursor = conn.cursor()
         cursor.execute(
-            f"""
-            CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
+            """
+            CREATE TABLE IF NOT EXISTS command_settings (
                 id INTEGER PRIMARY KEY,
                 guild_id INTEGER NOT NULL,
                 command_name VARCHAR(100) NOT NULL,
@@ -22,9 +20,9 @@ def migrate() -> None:
             """
         )
         cursor.execute(
-            f"""
-            CREATE INDEX IF NOT EXISTS {INDEX_NAME}
-            ON {TABLE_NAME} (guild_id)
+            """
+            CREATE INDEX IF NOT EXISTS ix_command_settings_guild_id
+            ON command_settings (guild_id)
             """
         )
         conn.commit()
