@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, String, ForeignKey, Column, Date, Integer, Numeric
+from sqlalchemy import create_engine, String, ForeignKey, Column, Date, Integer, Numeric, select, func
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, mapped_column, Mapped, relationship, Session
@@ -55,6 +55,7 @@ class Transaction(Base):
     recieved: Mapped[float] = mapped_column()
 
     hash: Mapped[str] = mapped_column(nullable=True)
+    network: Mapped[str] = mapped_column(nullable=True)
     coin: Mapped[str] = mapped_column(nullable=False)
 
     status: Mapped[str] = mapped_column(default="WAITING")
@@ -79,7 +80,7 @@ async def create_transaction(**kwargs):
     
 async def update_transaction_status(transaction_id, new_status):
     async with AsyncSessionFactory() as session:
-        trans = session.get(Transaction, transaction_id)
+        trans = await session.get(Transaction, transaction_id)
         if not trans:
             raise EntityNotFoundError(f"transaction with id {transaction_id} not found")
         
@@ -102,3 +103,11 @@ async def update_transaction(transaction_id, **kwargs):
         await session.refresh(trans)  
         
         return trans
+
+async def get_transaction_by_hash(tx_hash: str):
+    normalized_hash = tx_hash.strip().lower()
+    async with AsyncSessionFactory() as session:
+        result = await session.execute(
+            select(Transaction).where(func.lower(Transaction.hash) == normalized_hash)
+        )
+        return result.scalar_one_or_none()
