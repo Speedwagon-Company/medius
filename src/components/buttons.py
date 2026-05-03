@@ -64,7 +64,12 @@ class TradeSelectRoles(discord.ui.View):
     async def cancel_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.canceled = True
         self.stop()
+<<<<<<< HEAD
         await interaction.channel.send(embed=await create_suc_embed(f"Trade canceled by {interaction.user.mention}", "Deleting channel in 10 seconds"))
+=======
+        await interaction.message.reply("Processing")
+        await interaction.channel.send(embed=create_suc_embed(f"Trade canceled by {interaction.user.mention}", "Deleting channel in 10 seconds"))
+>>>>>>> main
 
     async def handle_inter(self, interaction: discord.Interaction):
         sender = self.roles.get(TradeRoles.SENDER, 'Not selected')
@@ -91,10 +96,16 @@ class ReleaseTradeMoney(discord.ui.View):
         if interaction.user == self.reciever:
             self.confirmed = True
             self.stop()
+<<<<<<< HEAD
             return await interaction.response.send_message(embed=await create_suc_embed("Realeasing money"))
+=======
+            await interaction.response.send_message("Processing",ephemeral=True)
+            return await interaction.channel.send(embed=create_suc_embed("Realeasing money"))
+>>>>>>> main
 
         await interaction.response.send_message("You're not a reciever", ephemeral=True) 
     
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
-    async def cancel_button(self, interaction: discord.Integration, button: discord.ui.Button):
+    async def cancel_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("Processing",ephemeral=True)
         self.stop()
