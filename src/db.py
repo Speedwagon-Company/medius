@@ -1,6 +1,10 @@
+<<<<<<< HEAD
+from sqlalchemy import create_engine, String, ForeignKey, Column, Date, Integer, Numeric, select, func, update
+=======
 from typing import Any
 
 from sqlalchemy import Boolean, JSON, UniqueConstraint, create_engine, String, ForeignKey, Column, Date, Integer, Numeric, select, func
+>>>>>>> main
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, mapped_column, Mapped, relationship, Session
@@ -65,6 +69,62 @@ class Transaction(Base):
     reciever: Mapped["User"] = relationship(foreign_keys=[reciever_id])
     sender: Mapped["User"] = relationship(foreign_keys=[sender_id])
 
+<<<<<<< HEAD
+class Config(Base):
+    __tablename__ = "configs"
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    embed_suc_color: Mapped[str] = mapped_column()
+
+
+
+async def ensure_config_exists() -> None:
+    """
+    Создаёт запись в конфиге только один раз, если её нет
+    """
+    async with AsyncSessionFactory() as session:
+        result = await session.execute(select(Config).limit(1))
+        config = result.scalar_one_or_none()
+        
+        if config is None:
+            default_config = Config(embed_suc_color="#00ff00")
+            session.add(default_config)
+            await session.commit()
+
+async def get_embed_suc_color() -> str:
+    """
+    Возвращает значение embed_suc_color из конфига
+    """
+    async with AsyncSessionFactory() as session:
+        result = await session.execute(select(Config.embed_suc_color).limit(1))
+        color = result.scalar_one_or_none()
+        
+        if color is None:
+            await ensure_config_exists()
+            return "#00ff00"
+        
+        return color
+
+async def set_embed_suc_color(new_color: str) -> None:
+    """
+    Меняет значение embed_suc_color в конфиге
+    """
+    async with AsyncSessionFactory() as session:
+        result = await session.execute(select(Config.id).limit(1))
+        config_id = result.scalar_one_or_none()
+        
+        if config_id is None:
+            await ensure_config_exists()
+            # После создания конфига, обновляем его
+            async with AsyncSessionFactory() as new_session:
+                stmt = update(Config).values(embed_suc_color=new_color)
+                await new_session.execute(stmt)
+                await new_session.commit()
+        else:
+            stmt = update(Config).where(Config.id == config_id).values(embed_suc_color=new_color)
+            await session.execute(stmt)
+            await session.commit()
+=======
 class CommandSetting(Base):
     __tablename__ = "command_settings"
     __table_args__ = (
@@ -76,6 +136,7 @@ class CommandSetting(Base):
     command_name: Mapped[str] = mapped_column(String(100))
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     extra_settings: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+>>>>>>> main
 
 async def create_trade(user1_discord_id: int, user2_discord_id: int):
     async with AsyncSessionFactory() as session:
