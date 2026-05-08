@@ -2,3 +2,10 @@ __pycache__/
 .env
 test.db
 venv/
+bot.db
+graphify-out/
+.pytest_cache/
+.venv/
+testsprite_tests/
+dump.py
+migrate.py

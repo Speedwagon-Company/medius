@@ -1,13 +1,10 @@
-<<<<<<< HEAD
-from sqlalchemy import create_engine, String, ForeignKey, Column, Date, Integer, Numeric, select, func, update
-=======
 from typing import Any
 
-from sqlalchemy import Boolean, JSON, UniqueConstraint, create_engine, String, ForeignKey, Column, Date, Integer, Numeric, select, func
->>>>>>> main
+from sqlalchemy import Boolean, JSON, UniqueConstraint, String, ForeignKey, select, func, update
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, mapped_column, Mapped, relationship, Session
+from sqlalchemy.orm import mapped_column, Mapped, relationship, Session
+from sqlalchemy.exc import IntegrityError
 from exceptions import EntityNotFoundError
 
 
@@ -50,13 +47,20 @@ class Trade(Base):
 
 class Transaction(Base):
     __tablename__ = "transactions"
+    __table_args__ = (
+        UniqueConstraint("hash", name="uq_transactions_hash"),
+    )
     
     id: Mapped[int] = mapped_column(primary_key=True)
+    trade_id: Mapped[int | None] = mapped_column(ForeignKey("trades.id"), nullable=True, index=True)
     reciever_id: Mapped[int] = mapped_column(ForeignKey("users.discord_id"))
     sender_id: Mapped[int] = mapped_column(ForeignKey("users.discord_id"))
+    channel_id: Mapped[int | None] = mapped_column(nullable=True, index=True)
 
     reciever_wallet: Mapped[str] = mapped_column()
     sender_wallet: Mapped[str] = mapped_column()
+    escrow_wallet: Mapped[str | None] = mapped_column(nullable=True)
+    expected_amount: Mapped[float | None] = mapped_column(nullable=True)
 
     recieved: Mapped[float] = mapped_column()
 
@@ -64,67 +68,12 @@ class Transaction(Base):
     network: Mapped[str] = mapped_column(nullable=True)
     coin: Mapped[str] = mapped_column(nullable=False)
 
-    status: Mapped[str] = mapped_column(default="WAITING")
+    status: Mapped[str] = mapped_column(default="WAITING_DEPOSIT")
 
+    trade: Mapped["Trade"] = relationship()
     reciever: Mapped["User"] = relationship(foreign_keys=[reciever_id])
     sender: Mapped["User"] = relationship(foreign_keys=[sender_id])
 
-<<<<<<< HEAD
-class Config(Base):
-    __tablename__ = "configs"
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    embed_suc_color: Mapped[str] = mapped_column()
-
-
-
-async def ensure_config_exists() -> None:
-    """
-    Создаёт запись в конфиге только один раз, если её нет
-    """
-    async with AsyncSessionFactory() as session:
-        result = await session.execute(select(Config).limit(1))
-        config = result.scalar_one_or_none()
-        
-        if config is None:
-            default_config = Config(embed_suc_color="#00ff00")
-            session.add(default_config)
-            await session.commit()
-
-async def get_embed_suc_color() -> str:
-    """
-    Возвращает значение embed_suc_color из конфига
-    """
-    async with AsyncSessionFactory() as session:
-        result = await session.execute(select(Config.embed_suc_color).limit(1))
-        color = result.scalar_one_or_none()
-        
-        if color is None:
-            await ensure_config_exists()
-            return "#00ff00"
-        
-        return color
-
-async def set_embed_suc_color(new_color: str) -> None:
-    """
-    Меняет значение embed_suc_color в конфиге
-    """
-    async with AsyncSessionFactory() as session:
-        result = await session.execute(select(Config.id).limit(1))
-        config_id = result.scalar_one_or_none()
-        
-        if config_id is None:
-            await ensure_config_exists()
-            # После создания конфига, обновляем его
-            async with AsyncSessionFactory() as new_session:
-                stmt = update(Config).values(embed_suc_color=new_color)
-                await new_session.execute(stmt)
-                await new_session.commit()
-        else:
-            stmt = update(Config).where(Config.id == config_id).values(embed_suc_color=new_color)
-            await session.execute(stmt)
-            await session.commit()
-=======
 class CommandSetting(Base):
     __tablename__ = "command_settings"
     __table_args__ = (
@@ -136,7 +85,6 @@ class CommandSetting(Base):
     command_name: Mapped[str] = mapped_column(String(100))
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     extra_settings: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
->>>>>>> main
 
 async def create_trade(user1_discord_id: int, user2_discord_id: int):
     async with AsyncSessionFactory() as session:
@@ -149,7 +97,11 @@ async def create_transaction(**kwargs):
     async with AsyncSessionFactory() as session:
         trans = Transaction(**kwargs)
         session.add(trans)
-        await session.commit()
+        try:
+            await session.commit()
+        except IntegrityError:
+            await session.rollback()
+            raise
         await session.refresh(trans)
         return trans
     
@@ -178,6 +130,59 @@ async def update_transaction(transaction_id, **kwargs):
         await session.refresh(trans)  
         
         return trans
+
+async def get_transaction(transaction_id: int):
+    async with AsyncSessionFactory() as session:
+        return await session.get(Transaction, transaction_id)
+
+async def list_transactions_by_statuses(statuses: list[str]):
+    async with AsyncSessionFactory() as session:
+        result = await session.execute(
+            select(Transaction).where(Transaction.status.in_(statuses))
+        )
+        return list(result.scalars().all())
+
+async def try_update_transaction_status(transaction_id: int, from_status: str, to_status: str) -> bool:
+    async with AsyncSessionFactory() as session:
+        result = await session.execute(
+            update(Transaction)
+            .where(
+                Transaction.id == transaction_id,
+                Transaction.status == from_status,
+            )
+            .values(status=to_status)
+        )
+        await session.commit()
+        return result.rowcount == 1
+
+async def attach_deposit_if_waiting(transaction_id: int, tx_hash: str, recieved: float) -> bool:
+    normalized_hash = tx_hash.strip().lower()
+    async with AsyncSessionFactory() as session:
+        try:
+            result = await session.execute(
+                update(Transaction)
+                .where(
+                    Transaction.id == transaction_id,
+                    Transaction.status == "WAITING_DEPOSIT",
+                    Transaction.hash.is_(None),
+                )
+                .values(
+                    hash=normalized_hash,
+                    recieved=recieved,
+                    status="DEPOSIT_SEEN",
+                )
+            )
+            await session.commit()
+            if result.rowcount == 1:
+                return True
+        except IntegrityError:
+            await session.rollback()
+            return False
+
+        current = await session.get(Transaction, transaction_id)
+        if not current or not current.hash:
+            return False
+        return current.hash.strip().lower() == normalized_hash
 
 async def get_transaction_by_hash(tx_hash: str):
     normalized_hash = tx_hash.strip().lower()

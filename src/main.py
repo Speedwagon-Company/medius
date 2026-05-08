@@ -6,6 +6,7 @@ import os, logging, traceback
 from dotenv import load_dotenv
 from utils.crypto import init_w3, subscribe_to_blocks, context_manager_subscription_example
 import asyncio, requests, db
+from migrate_trade_flow_guard import migrate as migrate_trade_flow_guard
 #     level=logging.DEBUG,
 #     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 # )
@@ -53,8 +54,9 @@ async def on_ready():
     print('ready')
 
 async def main():
-    await init_w3()
     await db.init_db()
+    await asyncio.to_thread(migrate_trade_flow_guard)
+    await init_w3()
     asyncio.create_task(bot.start(TOKEN))
     try:
 

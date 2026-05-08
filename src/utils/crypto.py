@@ -3,8 +3,8 @@ import os, asyncio
 from websockets.exceptions import ConnectionClosedError
 import requests, asyncio
 from web3.exceptions import TransactionNotFound
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import threading, json, time, websockets
+import websockets
+from typing import Any
 
 
 RECIPIENT = "0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD"
@@ -72,7 +72,7 @@ async def subscribe_to_blocks():
             "content": f"Crypto module crashed {e}",
             }
 
-            response = requests.post(os.getenv("WEBHOOK_URL"), json=data)
+            await asyncio.to_thread(requests.post, os.getenv("WEBHOOK_URL"), json=data)
             print(f"Ошибка подключения: {e}")
             print("Переподключение через 2 секунд...")
             await asyncio.sleep(2)
@@ -91,18 +91,18 @@ async def handle_pending_transactions():
     
     global W3
     
-    if not W3.is_connected():
+    if not await W3.is_connected():
         print(f"Не удалось подключиться к узлу: {http_url}")
         return
     
     print(f"Подключено к узлу")
 
-    last_block = W3.eth.block_number
+    last_block = await W3.eth.block_number
     print(f"Текущий блок: {last_block}")
     
     while True:
         try:
-            current_block = W3.eth.block_number
+            current_block = await W3.eth.block_number
             
             if current_block > last_block:
                 print(f"Новые блоки: {last_block + 1} -> {current_block}")
@@ -110,7 +110,7 @@ async def handle_pending_transactions():
 
                 for block_num in range(last_block + 1, current_block + 1):
                     try:
-                        block = W3.eth.get_block(block_num, full_transactions=True)
+                        block = await W3.eth.get_block(block_num, full_transactions=True)
                         
                         for tx in block.transactions:
                             from_addr = tx['from'].lower()
@@ -142,30 +142,119 @@ async def handle_pending_transactions():
 
 
 async def context_manager_subscription_example():
-    k_args =  {
-        'ping_interval': 30,  
-        'ping_timeout': 10    
-    }
-    #  async with AsyncWeb3(AsyncIPCProvider("./path/to.filename.ipc") as w3:  # for the AsyncIPCProvider
-    async with AsyncWeb3(WebSocketProvider(os.getenv("CHAINSTACK_WS"), websocket_kwargs=k_args)) as w3:  # for the WebSocketProvider
-        # subscribe to new block headers
-        subscription_id = await w3.eth.subscribe("newPendingTransactions", True)
+    ws_url = os.getenv("CHAINSTACK_WS")
+    if not ws_url:
+        print("[crypto] CHAINSTACK_WS is not set, subscription loop is disabled")
+        return
 
-        async for response in w3.socket.process_subscriptions():
-            res = response["result"]
-            if res["to"] == "0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD":
-                TRANSACTIONS[res["from"]] = res
-                print(f"got transaction {response}\n")
-            # handle responses here
+    k_args = {"ping_interval": 30, "ping_timeout": 10}
+    target_wallet = (os.getenv("OWNER_WALLET") or RECIPIENT).lower()
+    reconnect_delay = 1
+    max_reconnect_delay = 30
+
+    while True:
+        try:
+            async with AsyncWeb3(WebSocketProvider(ws_url, websocket_kwargs=k_args)) as w3:
+                subscription_id = await w3.eth.subscribe("newPendingTransactions", True)
+                print("[crypto] pending transactions subscription started")
+                reconnect_delay = 1
+
+                try:
+                    async for response in w3.socket.process_subscriptions():
+                        _handle_pending_subscription_message(response, target_wallet)
+                finally:
+                    try:
+                        await w3.eth.unsubscribe(subscription_id)
+                    except Exception as unsub_error:
+                        print(f"[crypto] failed to unsubscribe pending transactions: {unsub_error}")
+        except asyncio.CancelledError:
+            print("[crypto] pending transactions subscription cancelled")
+            raise
+        except (ConnectionClosedError, ConnectionResetError, OSError, websockets.ConnectionClosed) as conn_error:
+            print(
+                f"[crypto] websocket connection lost ({type(conn_error).__name__}), "
+                f"retrying in {reconnect_delay}s"
+            )
+        except Exception as error:
+            print(
+                f"[crypto] subscription error ({type(error).__name__}), "
+                f"retrying in {reconnect_delay}s: {error}"
+            )
+
+        await asyncio.sleep(reconnect_delay)
+        reconnect_delay = min(reconnect_delay * 2, max_reconnect_delay)
 
 
-        # still an open connection, make any other requests and get
-        # responses via send / receive
-        latest_block = await w3.eth.get_block("latest")
-        print(f"Latest block: {latest_block}")
+def _handle_pending_subscription_message(response: Any, target_wallet: str) -> None:
+    result = response.get("result") if isinstance(response, dict) else None
+    if not isinstance(result, dict):
+        return
 
-        # the connection closes automatically when exiting the context
-        # manager (the `async with` block)
+    tx_to = result.get("to")
+    tx_from = result.get("from")
+    if not isinstance(tx_to, str) or not isinstance(tx_from, str):
+        return
+
+    if tx_to.lower() != target_wallet:
+        return
+
+    tx_hash_key = _normalize_tx_hash(result.get("hash"))
+    if tx_hash_key:
+        TRANSACTIONS[tx_hash_key] = result
+    tx_hash = result.get("hash")
+    printable_hash = tx_hash.hex() if hasattr(tx_hash, "hex") else str(tx_hash)
+    print(f"[crypto] matched pending transaction {printable_hash}")
+
+def _normalize_wallet(address: str | None) -> str:
+    if not isinstance(address, str):
+        return ""
+    return address.strip().lower()
+
+def _normalize_tx_hash(tx_hash: Any) -> str:
+    if tx_hash is None:
+        return ""
+    if hasattr(tx_hash, "hex"):
+        return tx_hash.hex().strip().lower()
+    return str(tx_hash).strip().lower()
+
+def _transaction_matches(
+    tx: dict[str, Any],
+    sender_wallet: str,
+    recipient_wallet: str,
+    min_value_wei: int,
+) -> bool:
+    tx_from = _normalize_wallet(tx.get("from"))
+    tx_to = _normalize_wallet(tx.get("to"))
+    tx_value = tx.get("value")
+    if not isinstance(tx_value, int):
+        return False
+
+    return (
+        tx_from == _normalize_wallet(sender_wallet)
+        and tx_to == _normalize_wallet(recipient_wallet)
+        and tx_value >= min_value_wei
+    )
+
+async def _scan_recent_blocks_for_match(
+    sender_wallet: str,
+    recipient_wallet: str,
+    min_value_wei: int,
+    lookback_blocks: int = 6,
+):
+    if W3 is None:
+        return None
+
+    latest_block = await W3.eth.block_number
+    start_block = max(0, latest_block - lookback_blocks)
+    for block_num in range(latest_block, start_block - 1, -1):
+        block = await W3.eth.get_block(block_num, full_transactions=True)
+        for tx in block.get("transactions", []):
+            if _transaction_matches(tx, sender_wallet, recipient_wallet, min_value_wei):
+                tx_hash_key = _normalize_tx_hash(tx.get("hash"))
+                if tx_hash_key:
+                    TRANSACTIONS.pop(tx_hash_key, None)
+                return tx
+    return None
 
 def check_pending_transaction(tx_hash, target_address_lower, w3):
   try:
@@ -178,14 +267,30 @@ def check_pending_transaction(tx_hash, target_address_lower, w3):
   return None
 
 
-async def wait_for_transaction(wallet):
+async def wait_for_transaction(sender_wallet: str, recipient_wallet: str, min_value_wei: int):
     print("STARTED CHECKING")
+    attempts = 0
     while True:
-        if TRANSACTIONS.get(wallet):
-            print("GOT TRANSaCTION")
-            res = TRANSACTIONS[wallet]
-            del TRANSACTIONS[wallet]
-            return res
+        for tx_hash_key, tx in list(TRANSACTIONS.items()):
+            if _transaction_matches(tx, sender_wallet, recipient_wallet, min_value_wei):
+                print("GOT TRANSaCTION")
+                TRANSACTIONS.pop(tx_hash_key, None)
+                return tx
+
+        if attempts % 5 == 0:
+            try:
+                from_chain = await _scan_recent_blocks_for_match(
+                    sender_wallet=sender_wallet,
+                    recipient_wallet=recipient_wallet,
+                    min_value_wei=min_value_wei,
+                )
+                if from_chain:
+                    print("GOT TRANSACTION FROM RECENT BLOCKS")
+                    return from_chain
+            except Exception as scan_error:
+                print(f"[crypto] failed to scan recent blocks: {scan_error}")
+
+        attempts += 1
         await asyncio.sleep(1)
 
 

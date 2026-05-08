@@ -2,7 +2,6 @@
 from enums import TradeRoles
 import discord
 from utils.dis import *
-import time
 
 
 class Confirm(discord.ui.View):
@@ -15,15 +14,15 @@ class Confirm(discord.ui.View):
     async def confirm_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         # chan = await self.create_ticket_channel(interaction,self.selected_user)
         # view = TradeSelectRoles()
-        # embed = await create_suc_embed("Select your role")
+        # embed = create_suc_embed("Select your role")
         # await chan.send(view=view,embed=embed)
-        await interaction.response.send_message(embed=await create_suc_embed("Success"), ephemeral=True)
+        await interaction.response.send_message(embed=create_suc_embed("Success"), ephemeral=True)
         self.confirmed = True
         self.stop()
 
     @discord.ui.button(label='Cancel', style=discord.ButtonStyle.red)
     async def cancel_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message(embed=await create_suc_embed("Canceled"), ephemeral=True)
+        await interaction.response.send_message(embed=create_suc_embed("Canceled"), ephemeral=True)
         self.stop()
 
 
@@ -64,48 +63,62 @@ class TradeSelectRoles(discord.ui.View):
     async def cancel_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.canceled = True
         self.stop()
-<<<<<<< HEAD
-        await interaction.channel.send(embed=await create_suc_embed(f"Trade canceled by {interaction.user.mention}", "Deleting channel in 10 seconds"))
-=======
         await interaction.message.reply("Processing")
         await interaction.channel.send(embed=create_suc_embed(f"Trade canceled by {interaction.user.mention}", "Deleting channel in 10 seconds"))
->>>>>>> main
 
     async def handle_inter(self, interaction: discord.Interaction):
         sender = self.roles.get(TradeRoles.SENDER, 'Not selected')
         receiver = self.roles.get(TradeRoles.RECIEVER, 'Not selected')
 
         if self.roles.get(TradeRoles.SENDER) and self.roles.get(TradeRoles.RECIEVER):
-            # msg: discord.Message = await interaction.channel.send(embed=await create_suc_embed("All roles selected, now continue to payment", "Status: waiting"))
+            # msg: discord.Message = await interaction.channel.send(embed=create_suc_embed("All roles selected, now continue to payment", "Status: waiting"))
             self.stop()
 
-        embed = await create_suc_embed("Select your role", f"**Coin:** {self.selectedCoin} \n **Sender:** {sender} \n **Reciever:** {receiver}")
+        embed = create_suc_embed("Select your role", f"**Coin:** {self.selectedCoin} \n **Sender:** {sender} \n **Reciever:** {receiver}")
         await interaction.response.edit_message(
             embed=embed,
             view=self
         )
 
 class ReleaseTradeMoney(discord.ui.View):
-    def __init__(self, reciever):
-        super().__init__()
+    def __init__(self, reciever_id: int):
+        super().__init__(timeout=900)
         self.value = None
-        self.reciever = reciever
+        self.reciever_id = reciever_id
         self.confirmed = False
+        self.canceled = False
+        self.message: discord.Message | None = None
+
+    async def on_timeout(self) -> None:
+        for item in self.children:
+            item.disabled = True
+        if self.message:
+            await self.message.edit(view=self)
+
     @discord.ui.button(label='Release', style=discord.ButtonStyle.green)
     async def release_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if interaction.user == self.reciever:
+        if interaction.user.id == self.reciever_id:
+            if self.confirmed:
+                await interaction.response.send_message("Release is already processing.", ephemeral=True)
+                return
+
             self.confirmed = True
+            for item in self.children:
+                item.disabled = True
             self.stop()
-<<<<<<< HEAD
-            return await interaction.response.send_message(embed=await create_suc_embed("Realeasing money"))
-=======
-            await interaction.response.send_message("Processing",ephemeral=True)
+            await interaction.response.send_message("Processing", ephemeral=True)
+            if self.message:
+                await self.message.edit(view=self)
             return await interaction.channel.send(embed=create_suc_embed("Realeasing money"))
->>>>>>> main
 
         await interaction.response.send_message("You're not a reciever", ephemeral=True) 
     
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
     async def cancel_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("Processing",ephemeral=True)
+        self.canceled = True
+        await interaction.response.send_message("Processing", ephemeral=True)
+        for item in self.children:
+            item.disabled = True
+        if self.message:
+            await self.message.edit(view=self)
         self.stop()
