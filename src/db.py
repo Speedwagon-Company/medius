@@ -74,6 +74,12 @@ class Transaction(Base):
     reciever: Mapped["User"] = relationship(foreign_keys=[reciever_id])
     sender: Mapped["User"] = relationship(foreign_keys=[sender_id])
 
+class Config(Base):
+    __tablename__ = "configs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    embed_suc_color: Mapped[str] = mapped_column()
+
 class CommandSetting(Base):
     __tablename__ = "command_settings"
     __table_args__ = (
@@ -85,6 +91,38 @@ class CommandSetting(Base):
     command_name: Mapped[str] = mapped_column(String(100))
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     extra_settings: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
+
+async def ensure_config_exists() -> None:
+    async with AsyncSessionFactory() as session:
+        result = await session.execute(select(Config).limit(1))
+        config = result.scalar_one_or_none()
+        if config is None:
+            session.add(Config(embed_suc_color="#00ff00"))
+            await session.commit()
+
+async def get_embed_suc_color() -> str:
+    async with AsyncSessionFactory() as session:
+        result = await session.execute(select(Config.embed_suc_color).limit(1))
+        color = result.scalar_one_or_none()
+        if color is None:
+            await ensure_config_exists()
+            return "#00ff00"
+        return color
+
+async def set_embed_suc_color(new_color: str) -> None:
+    async with AsyncSessionFactory() as session:
+        result = await session.execute(select(Config.id).limit(1))
+        config_id = result.scalar_one_or_none()
+        if config_id is None:
+            await ensure_config_exists()
+            await session.execute(update(Config).values(embed_suc_color=new_color))
+        else:
+            await session.execute(
+                update(Config)
+                .where(Config.id == config_id)
+                .values(embed_suc_color=new_color)
+            )
+        await session.commit()
 
 async def create_trade(user1_discord_id: int, user2_discord_id: int):
     async with AsyncSessionFactory() as session:
