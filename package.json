@@ -1,0 +1,17 @@
+{
+  "name": "medius-ts-cogs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "discord.js": "^14.26.2",
+    "discord.ts-cogs": "^1.0.1",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.9.3"
+  }
+}
