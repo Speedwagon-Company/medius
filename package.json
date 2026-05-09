@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist-ts/main.js"
   },
   "dependencies": {
     "discord.js": "^14.26.2",
     "discord.ts-cogs": "^1.0.1",
+    "dotenv": "^16.4.7",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
