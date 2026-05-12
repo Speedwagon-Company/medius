@@ -19,6 +19,8 @@ import {
   TextChannel,
 } from "discord.js";
 import { ArgumentType, Cog } from "discord.ts-cogs";
+import { ethHttp, waitForTransaction, signAndSend } from "../utils/crypto";
+import { formatEther, Transaction, TransactionReceipt } from "viem";
 
 enum TradeRole {
   Receiver = "receiver",
@@ -168,11 +170,13 @@ export class TradeCog extends Cog {
         ],
       });
 
-      const receipt = await waitForTransactionReceipt(tx.hash);
+      const receipt: TransactionReceipt = await ethHttp.waitForTransactionReceipt({hash: tx.hash});
       const transactionInfo = await getTransactionInfo(tx.hash);
-      const value = transactionInfo.valueEth;
+      const value: number = parseFloat(formatEther(tx.value, "wei"));
+      console.log("reciever=d ", value, tx.value, formatEther(tx.value, "wei"))
 
-      if (receipt.status === 1) {
+
+      if (receipt.status === "success") {
         await updateTransactionStatus(transaction.id, "CONFIRMED");
         await sendTransactionLog(
           guild,
@@ -276,7 +280,7 @@ export class TradeCog extends Cog {
       time: COMPONENT_TIMEOUT_MS,
     })) as StringSelectMenuInteraction;
 
-    await selection.update({ components: [] });
+    await selection.update({ content: `✅ Selected: ${selection.values[0]}`,components: [] });
     return selection.values[0];
   }
 
@@ -451,7 +455,7 @@ export class TradeCog extends Cog {
     receiver: GuildMember,
     selectedCoin: string,
     txHash: string,
-    value: string,
+    value: number,
   ): Promise<boolean> {
     const releaseId = `trade_release:${message.id}`;
     const cancelId = `trade_release_cancel:${message.id}`;
@@ -489,19 +493,19 @@ export class TradeCog extends Cog {
     return false;
   }
 
-  private async handleCancelMoney(value: string, senderWallet: string, channel: TextChannel): Promise<void> {
+  private async handleCancelMoney(value: number, senderWallet: string, channel: TextChannel): Promise<void> {
     await channel.send({
       embeds: [await createSuccessEmbed("Sender canceled deal, transferring money to him")],
     });
-    const txHash = await signAndSend(value, senderWallet);
+    const txHash: any = await signAndSend(value, senderWallet);
     const message = await channel.send({
       embeds: [
         await createSuccessEmbed("Sent transaction", `Transaction hash: \`\`\`${txHash}\`\`\`\nStatus: pending`),
       ],
     });
-    const receipt = await waitForTransactionReceipt(txHash, 120_000);
+    const receipt: TransactionReceipt = await ethHttp.waitForTransactionReceipt({hash:txHash});
 
-    if (receipt.status === 1) {
+    if (receipt.status === "success") {
       await message.edit({
         embeds: [
           await createSuccessEmbed("Sent transaction", `Transaction hash: \`\`\`${txHash}\`\`\`\nStatus: Success`),
@@ -510,16 +514,16 @@ export class TradeCog extends Cog {
     }
   }
 
-  private async handleConfirmMoney(value: string, receiverWallet: string, channel: TextChannel): Promise<void> {
-    const txHash = await signAndSend(value, receiverWallet);
+  private async handleConfirmMoney(value: number, receiverWallet: string, channel: TextChannel): Promise<void> {
+    const txHash: any = await signAndSend(value, receiverWallet);
     const message = await channel.send({
       embeds: [
         await createSuccessEmbed("Sent transaction", `Transaction hash: \`\`\`${txHash}\`\`\`\nStatus: pending`),
       ],
     });
-    const receipt = await waitForTransactionReceipt(txHash, 120_000);
+    const receipt: TransactionReceipt = await ethHttp.waitForTransactionReceipt({hash:txHash});
 
-    if (receipt.status === 1) {
+    if (receipt.status === "success") {
       await message.edit({
         embeds: [
           await createSuccessEmbed("Sent transaction", `Transaction hash: \`\`\`${txHash}\`\`\`\nStatus: Success`),
@@ -583,11 +587,7 @@ async function sendTransactionLog(guild: Guild, embed: EmbedBuilder): Promise<vo
   void embed;
 }
 
-async function waitForTransaction(senderWallet: string): Promise<PendingChainTransaction> {
-  // TODO: port/import the project's pending transaction watcher.
-  void senderWallet;
-  throw new Error("waitForTransaction is not implemented yet.");
-}
+
 
 async function getTransactionInfo(txHash: string): Promise<ChainTransactionInfo> {
   // TODO: port/import the project's chain transaction lookup and ether formatting.
@@ -595,16 +595,5 @@ async function getTransactionInfo(txHash: string): Promise<ChainTransactionInfo>
   return { valueEth: "0" };
 }
 
-async function waitForTransactionReceipt(txHash: string, timeoutMs?: number): Promise<ChainReceipt> {
-  // TODO: port/import the project's chain receipt waiter.
-  void txHash;
-  void timeoutMs;
-  return { status: 1 };
-}
 
-async function signAndSend(valueEth: string, toWallet: string): Promise<string> {
-  // TODO: port/import the project's wallet signing and transfer implementation.
-  void valueEth;
-  void toWallet;
-  throw new Error("signAndSend is not implemented yet.");
-}
+

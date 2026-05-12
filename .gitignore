@@ -4,3 +4,5 @@ test.db
 venv/
 node_modules/
 dist-ts/
+
+/src-ts/generated/prisma
