@@ -13,12 +13,18 @@ import {
     PermissionFlagsBits,
     StringSelectMenuBuilder,
     StringSelectMenuInteraction,
-    TextChannel,
+    ForumThreadChannel,
     User,
+    ThreadChannel,
+    ForumChannel,
+    GuildBasedChannel,
+    ThreadAutoArchiveDuration,
 } from 'discord.js';
 import { sleep } from '../utils';
 import { ethHttp, waitForTransaction, signAndSend } from "../utils/crypto";
 import { formatEther, Transaction, TransactionReceipt } from "viem";
+import { createSuccessEmbed } from '../utils/dis';
+import { treasure } from 'viem/chains';
 
 enum TradeRole {
     Receiver = "receiver",
@@ -26,6 +32,27 @@ enum TradeRole {
 }
 
 type RoleSelection = Partial<Record<TradeRole, GuildMember>>;
+
+type TradeInfo = {
+    channelId: string,
+    reciever?: GuildMember,
+    sender?: GuildMember,
+    recieverStatus?: TradeStatus,
+    senderStatus?: TradeStatus ,
+    recieved?: string,
+    selectedCoin: string
+    network: string,
+    canCallSupport: boolean
+}
+
+enum TradeStatus {
+    "CONFIRMED",
+    "CANCELLED",
+    "WAITING",
+    "SUPPORT_REQUEST"
+
+}
+
 
 type TradeTransaction = {
     id: number;
@@ -53,6 +80,7 @@ type ChainTransactionInfo = {
     valueEth: string;
 };
 
+export const trades: Map<string, TradeInfo> = new Map()
 const MM_WALLET = "0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD";
 const SEND_WALLET_TRIES = 5;
 const COMPONENT_TIMEOUT_MS = 10 * 60 * 1000;
@@ -90,15 +118,10 @@ const handlers: Record<string, SubcommandFn> = {
                 return;
             }
             console.log(target)
-            const channel = await createTicketChannel(interaction, target);
+            const {roles, channel} = await createTicketChannelAndAskRoles(interaction, target, selectedCoin);
             await createTrade(initiator.id, target.id);
 
-            const roles = await askTradeRoles(channel, [initiator, target], selectedCoin);
-            if (!roles) {
-                await sleep(10_000);
-                await channel.delete("Trade was canceled before role selection completed.");
-                return;
-            }
+
 
             const sender = roles[TradeRole.Sender];
             const receiver = roles[TradeRole.Receiver];
@@ -192,18 +215,27 @@ const handlers: Record<string, SubcommandFn> = {
                     channel,
                     transactionMessage,
                     receiver,
+                    sender,
                     selectedCoin,
                     tx.hash,
                     value,
                 );
-
-                if (!releaseConfirmed) {
+                console.log("TRADE STATUS ", releaseConfirmed)
+                if (releaseConfirmed == TradeStatus.CANCELLED) {
                     await handleCancelMoney(value, senderWallet, channel);
                     return;
+                }else if(releaseConfirmed == TradeStatus.CONFIRMED) {
+                    await handleConfirmMoney(value, receiverWallet, channel);
+                    return
+                // }else if(releaseConfirmed == TradeStatus.SUPPORT_REQUEST) {
+                    
                 }
-
-                await handleConfirmMoney(value, receiverWallet, channel);
-                return;
+                await channel.send({embeds:[await createSuccessEmbed("Request support please")]})
+                const trade = trades.get(channel.id)
+                if (trade) {
+                    trade!.canCallSupport = true
+                }
+                return
             }
 
             await transactionMessage.edit({
@@ -233,34 +265,46 @@ const handlers: Record<string, SubcommandFn> = {
 }
 
 
-async function createTicketChannel(
+async function createTicketChannelAndAskRoles(
     interaction: ChatInputCommandInteraction<"cached">,
     user: any,
-): Promise<TextChannel> {
+    selectedCoin: string
+): Promise<any> {
     // console.log(user)
     const guild = interaction.guild;
     const currentUser = interaction.member;
 
     const channelName = `trade-${currentUser.user.username}-${user.username}`.toLowerCase().replace(/[^a-z0-9-]/g, "-");
-
-    return guild.channels.create({
-        name: channelName.slice(0, 90),
-        type: ChannelType.GuildText,
-        permissionOverwrites: [
-            {
-                id: guild.roles.everyone.id,
-                deny: [PermissionFlagsBits.ViewChannel],
-            },
-            {
-                id: currentUser.id,
-                allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages],
-            },
-            {
-                id: user.id,
-                allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages],
-            },
-        ],
+    const forum: GuildBasedChannel | null = await interaction.guild.channels.fetch("1504040879697170573") as ForumChannel
+    const thread = await forum.threads.create({
+        name: channelName,
+        autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
+        reason: 'Needed a separate thread for food',
+        message:{content:"Initiating trade"},
+        
     });
+    const trade: TradeInfo = {
+        channelId:thread.id,
+        selectedCoin:selectedCoin,
+        network:"Etherium",
+        canCallSupport:false
+    }
+    trades.set(trade.channelId, trade)
+    await thread.members.add(currentUser)
+    await thread.members.add(user)
+    const roles = await askTradeRoles(thread, [currentUser, user], selectedCoin);
+    if (!roles) {
+        await sleep(10_000);
+        await thread.delete("Trade was canceled before role selection completed.");
+        return;
+    }
+    // console.log(forum)
+    // const thread = await forum.threads.create({
+    //     name: 'private-talk',
+    //     autoArchiveDuration: ThreadAutoArchiveDuration.OneDay,
+    //     type: ChannelType.GuildPrivateThread, // Required for private threads
+    // });
+    return {channel:thread, roles:roles}
 }
 
 async function askCoin(interaction: ChatInputCommandInteraction<"cached">): Promise<string> {
@@ -329,7 +373,7 @@ async function askConfirmation(
 }
 
 async function askTradeRoles(
-    channel: TextChannel,
+    channel: ForumThreadChannel,
     members: GuildMember[],
     selectedCoin: string,
 ): Promise<RoleSelection | null> {
@@ -346,7 +390,7 @@ async function askTradeRoles(
     return new Promise((resolve) => {
         const collector = message.createMessageComponentCollector({
             componentType: ComponentType.Button,
-            time: COMPONENT_TIMEOUT_MS,
+            time: 0,
         });
 
         collector.on("collect", async (button) => {
@@ -426,7 +470,7 @@ async function buildRolesEmbed(selectedCoin: string, roles: RoleSelection): Prom
     );
 }
 
-async function getWalletInTries(channel: TextChannel, member: any, tries: number): Promise<string> {
+async function getWalletInTries(channel: ForumThreadChannel, member: any, tries: number): Promise<string> {
     console.log("")
     for (let attempt = 0; attempt < tries; attempt += 1) {
         const collected = await channel.awaitMessages({
@@ -459,20 +503,22 @@ async function getWalletInTries(channel: TextChannel, member: any, tries: number
 }
 
 async function askReleaseMoney(
-    channel: TextChannel,
+    channel: ForumThreadChannel,
     message: Message,
     receiver: GuildMember,
+    sender: GuildMember,
     selectedCoin: string,
     txHash: string,
     value: number,
-): Promise<boolean> {
+): Promise<TradeStatus | undefined> {
     const releaseId = `trade_release:${message.id}`;
     const cancelId = `trade_release_cancel:${message.id}`;
+    const votedUsers = new Set<string>(); // Храним ID проголосовавших
+    let finalResult: TradeStatus | undefined = undefined;
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder().setCustomId(releaseId).setLabel("Release").setStyle(ButtonStyle.Success),
         new ButtonBuilder().setCustomId(cancelId).setLabel("Cancel").setStyle(ButtonStyle.Danger),
     );
-
     await message.edit({
         embeds: [
             await createSuccessEmbed(
@@ -483,26 +529,133 @@ async function askReleaseMoney(
         components: [row],
     });
 
-    const button = (await message.awaitMessageComponent({
-        componentType: ComponentType.Button,
-        filter: (component) =>
-            [releaseId, cancelId].includes(component.customId) && component.user.id === receiver.id,
-        time: COMPONENT_TIMEOUT_MS,
-    })) as ButtonInteraction;
+    // const button = (await message.awaitMessageComponent({
+    //     componentType: ComponentType.Button,
+    //     filter: (component) =>
+    //         [releaseId, cancelId].includes(component.customId) && component.user.id === receiver.id || component.user.id === sender.id,
+    //     time: 0,
+    // })) as ButtonInteraction;
+    const trade: any = trades.get(channel.id)
+    // let res = undefined
+    // if (button.customId === releaseId) {
+    //     res = await releaseMoneyClicked(trade, button, channel)
+    // }else if(button.customId === cancelId) {
+    //     res = await cancelMoneyClicked(trade, button, channel)
 
-    if (button.customId === releaseId) {
-        await button.reply({ content: "Processing", flags: MessageFlags.Ephemeral });
-        await channel.send({ embeds: [await createSuccessEmbed("Releasing money")] });
-        await message.edit({ components: [] });
-        return true;
-    }
 
-    await button.reply({ content: "Processing", flags: MessageFlags.Ephemeral });
-    await message.edit({ components: [] });
-    return false;
+    // }
+
+    // if(trade.senderStatus != TradeStatus.WAITING && trade.recieverStatus != TradeStatus.WAITING) {
+    //     return res;
+
+    // }
+    return new Promise((resolve) => {
+        const collector = message.createMessageComponentCollector({
+            componentType: ComponentType.Button,
+            filter: (component) =>
+                [releaseId, cancelId].includes(component.customId) && 
+                [receiver.id, sender.id].includes(component.user.id) &&
+                !votedUsers.has(component.user.id), 
+            time: 0, 
+        });
+
+        collector.on('collect', async (button: ButtonInteraction) => {
+            votedUsers.add(button.user.id);
+            
+            let result: TradeStatus | undefined;
+            
+            if (button.customId === releaseId) {
+                result = await releaseMoneyClicked(trade, button, channel);
+                await button.reply({ 
+                    content: `✅ You voted to release. Waiting for other party... (${votedUsers.size}/2)`, 
+                    flags: MessageFlags.Ephemeral 
+                });
+            } else if (button.customId === cancelId) {
+                result = await cancelMoneyClicked(trade, button, channel);
+                await button.reply({ 
+                    content: `❌ You voted to cancel. Waiting for other party... (${votedUsers.size}/2)`, 
+                    flags: MessageFlags.Ephemeral 
+                });
+            }
+            
+            // Обновляем статус в зависимости от голоса
+            if (button.user.id === sender.id) {
+                trade.senderStatus = result;
+            } else if (button.user.id === receiver.id) {
+                trade.recieverStatus = result;
+            }
+            
+            // Проверяем, проголосовали ли оба
+            if (votedUsers.size === 2) {
+                // Определяем финальный результат
+                if (trade.senderStatus === TradeStatus.CONFIRMED && trade.recieverStatus === TradeStatus.CONFIRMED) {
+                    finalResult = TradeStatus.CONFIRMED;
+                    await channel.send({ embeds: [await createSuccessEmbed("Both parties confirmed! Releasing money...")] });
+                } else if (trade.senderStatus === TradeStatus.CANCELLED || trade.recieverStatus === TradeStatus.CANCELLED) {
+                    finalResult = TradeStatus.CANCELLED;
+                    await channel.send({ embeds: [await createSuccessEmbed("Transaction cancelled by one of the parties")] });
+                }
+                
+                // Очищаем кнопки
+                await message.edit({ components: [] });
+                collector.stop();
+                resolve(finalResult);
+            }
+        });
+
+        // collector.on('end',async (_, reason) => {
+        //     if (reason !== 'user') {
+        //         // Таймаут или ошибка
+        //         if (votedUsers.size < 2) {
+        //             const notVoted = [sender.id, receiver.id].filter(id => !votedUsers.has(id));
+        //             channel.send({ 
+        //                 embeds: [await createErrorEmbed(`Timeout waiting for <@${notVoted[0]}> to vote`)] 
+        //             });
+        //             await message.edit({ components: [] });
+        //         }
+        //         resolve(TradeStatus.CANCELLED);
+        //     }
+        // });
+    });
 }
 
-async function handleCancelMoney(value: number, senderWallet: string, channel: TextChannel): Promise<void> {
+async function releaseMoneyClicked(trade: TradeInfo, button: ButtonInteraction, channel: ThreadChannel) {
+    if(button.user.id == trade.reciever?.id) {
+        trade.recieverStatus = TradeStatus.CONFIRMED
+    }else if(button.user.id == trade.sender?.id) {
+        trade.senderStatus = TradeStatus.CONFIRMED
+    } 
+
+    await channel.send({embeds:[await createSuccessEmbed(`${button.user.username} pressed confirmed`)]})
+    return tradeStatusHandle(trade)
+}
+
+async function cancelMoneyClicked(trade: TradeInfo, button: ButtonInteraction, channel: ThreadChannel) {
+    if(button.user.id == trade.reciever?.id) {
+        trade.recieverStatus = TradeStatus.CANCELLED
+    }else if(button.user.id == trade.sender?.id) {
+        trade.senderStatus = TradeStatus.CANCELLED
+    } 
+    await channel.send({embeds:[await createSuccessEmbed(`${button.user.username} pressed cancel`)]})
+    return tradeStatusHandle(trade)
+}
+
+
+function tradeStatusHandle(trade: TradeInfo) {
+    if(trade.recieverStatus == TradeStatus.CONFIRMED && trade.senderStatus == TradeStatus.CONFIRMED)
+        return TradeStatus.CONFIRMED
+    if(
+        trade.senderStatus == TradeStatus.CANCELLED && trade.recieverStatus == TradeStatus.CANCELLED){
+        return TradeStatus.CANCELLED
+    }
+    if(trade.senderStatus == TradeStatus.CANCELLED && trade.recieverStatus == TradeStatus.CONFIRMED ||
+        trade.senderStatus == TradeStatus.CONFIRMED && trade.recieverStatus == TradeStatus.CANCELLED ) {
+            trade.canCallSupport = true
+            return TradeStatus.SUPPORT_REQUEST
+        }
+}
+
+async function handleCancelMoney(value: number, senderWallet: string, channel: ForumThreadChannel): Promise<void> {
     await channel.send({
         embeds: [await createSuccessEmbed("Sender canceled deal, transferring money to him")],
     });
@@ -525,7 +678,7 @@ async function handleCancelMoney(value: number, senderWallet: string, channel: T
 function isEvmAddress(value: string): boolean {
     return /^0x[a-fA-F0-9]{40}$/.test(value);
 }
-async function handleConfirmMoney(value: number, receiverWallet: string, channel: TextChannel): Promise<void> {
+async function handleConfirmMoney(value: number, receiverWallet: string, channel: ForumThreadChannel): Promise<void> {
     const txHash: any = await signAndSend(value, receiverWallet);
     const message = await channel.send({
         embeds: [
@@ -543,10 +696,7 @@ async function handleConfirmMoney(value: number, receiverWallet: string, channel
     }
 }
 
-async function createSuccessEmbed(title?: string, description?: string): Promise<EmbedBuilder> {
-    // TODO: replace with the project's config-backed embed color helper.
-    return new EmbedBuilder().setTitle(title ?? null).setDescription(description ?? null).setColor(0x00ff00);
-}
+
 
 async function createTrade(user1DiscordId: string, user2DiscordId: string): Promise<void> {
     // TODO: port/import the project's DB create_trade implementation.

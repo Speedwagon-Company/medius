@@ -1,13 +1,18 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
+import prisma from '../db';
+import { Config } from '../generated/prisma/client';
 
-// Описываем тип обработчика для типизации карты
 type SubcommandFn = (interaction: ChatInputCommandInteraction) => Promise<any>;
 
-// Карта обработчиков для подкоманд config
 const handlers: Record<string, SubcommandFn> = {
     color: async (interaction) => {
-        const color = interaction.options.getString('value');
-        // Логика смены цвета (например, сохранение в БД)
+        const color = interaction.options.getString('value') || "";
+        const cfg: Config | null = await prisma.config.findFirst()
+        if(!cfg) {
+            return
+        }
+
+        await prisma.config.update({where:{id: cfg.id},data:{embed_suc_color:color}})
         await interaction.reply({ content: `🎨 Цвет конфигурации изменен на: **${color}**`, ephemeral: true });
     }
 };
@@ -22,11 +27,7 @@ export const data = new SlashCommandBuilder()
                 opt.setName('value')
                     .setDescription('Выберите цвет')
                     .setRequired(true)
-                    .addChoices(
-                        { name: 'Красный', value: 'Red' },
-                        { name: 'Синий', value: 'Blue' },
-                        { name: 'Зеленый', value: 'Green' }
-                    )
+                    
             )
     );
 

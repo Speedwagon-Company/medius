@@ -49,8 +49,11 @@ watchMMWalletTrans()
 async function init() {
 
     new Promise(async (res) => {
-        if(!await prisma.config.findFirst()) {
+        const cfg = await prisma.config.findFirst()
+        console.log(cfg, !cfg)
+        if(cfg) {
             await prisma.config.create({data:{embed_suc_color:"0xff1a18"}})
+            console.log("created")
             return res
         }
     })
