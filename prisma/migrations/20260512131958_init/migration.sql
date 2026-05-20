@@ -1,0 +1,15 @@
+-- CreateTable
+CREATE TABLE "User" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT
+);
+
+-- CreateTable
+CREATE TABLE "Trade" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT
+);
+
+-- CreateTable
+CREATE TABLE "Config" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "embed_suc_color" TEXT NOT NULL
+);

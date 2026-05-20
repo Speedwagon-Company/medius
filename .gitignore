@@ -2,3 +2,7 @@ __pycache__/
 .env
 test.db
 venv/
+node_modules/
+dist-ts/
+
+/src-ts/generated/prisma
