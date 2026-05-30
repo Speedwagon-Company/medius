@@ -23,9 +23,7 @@ const handlers: Record<string, SubcommandFn> = {
             return await interaction.reply({content:"You cant call support",flags:MessageFlags.Ephemeral}, )
         }
 
-        if(channel.members.cache.has(interaction.member?.user.id)){
-            return await interaction.reply({content:"You already in this channel",flags:MessageFlags.Ephemeral}, )
-        }
+
         let reason = interaction.options.getString("reason")
         if(reason == null) {
             reason = "Not given"
@@ -33,7 +31,8 @@ const handlers: Record<string, SubcommandFn> = {
         const id = randomUUID()
         const supportReqChan: any = await interaction.client.channels.fetch(SUP_REQ_CHAN_ID) 
         const row =  buildReqSupportBtn(id)
-        const message: Message = await supportReqChan.send({ embeds:[await createSuccessEmbed(`Support request`, `User ${interaction.user.username} requested support \nReason: ${reason}`)],components:[row]})
+        const embed = await createSuccessEmbed(`Support request`, `User ${interaction.user.username} requested support \nReason: ${reason}`)
+        const message: Message = await supportReqChan.send({ embeds:[embed],components:[row]})
         await interaction.reply({content:`<@${interaction.user.id}> called support`})
         return new Promise((res,rej) => {
             const collector = message.createMessageComponentCollector({
@@ -42,9 +41,12 @@ const handlers: Record<string, SubcommandFn> = {
             });
             collector.on("collect", async (button: ButtonInteraction) => { 
                 if(button.customId === id) {
+                    if(channel.members.cache.has(interaction.member?.user.id)){
+                        return await interaction.reply({content:"You already in this channel",flags:MessageFlags.Ephemeral}, )
+                    }
                     // row.components.forEach((v: ButtonBuilder) => v.setDisabled(true))
                     await channel.members.add(interaction.user)
-                    // message.edit({})
+                    message.edit({embeds:[embed]})
                     await channel.send(`Added <@${button.user.id}>`)
                 }
             })

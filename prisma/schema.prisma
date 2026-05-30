@@ -13,15 +13,40 @@ datasource db {
 }
 
 model User {
-  id            Int    @id @default(autoincrement())
+  id Int @id @default(autoincrement())
+  discordId String @unique
+  username String
 
+  sentTrades   Trade[] @relation("sender")
+  receivedTrades Trade[] @relation("reciever")
+}
+
+enum TradeStatus {
+  WAITING
+  CONFIRMED
+  CANCELLED
 }
 
 model Trade {
-  id            Int    @id @default(autoincrement())
+  id     Int    @id @default(autoincrement())
+  channelId String @unique
+  sender User? @relation(name: "sender", fields: [senderId], references: [discordId])
+  reciever User? @relation(name: "reciever", fields: [recieverId], references: [discordId])
+  recieverStatus TradeStatus @default(WAITING)
+  senderStatus TradeStatus @default(WAITING)
+
+  status TradeStatus @default(WAITING)
+  selectedCoin String
+  network String
+  canCallSupport Boolean @default(false)
+
+  senderId String?
+  recieverId String?
+
+
 }
 
 model Config {
-  id            Int    @id @default(autoincrement())
+  id              Int    @id @default(autoincrement())
   embed_suc_color String
 }

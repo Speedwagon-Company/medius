@@ -84,6 +84,7 @@ async function init() {
     }
 
     await client.login(process.env.DIS_BOT_TOKEN);
+
 }
 
 client.once(Events.ClientReady, async (readyClient) => {

@@ -36,14 +36,41 @@ export type TradeSumAggregateOutputType = {
 
 export type TradeMinAggregateOutputType = {
   id: number | null
+  channelId: string | null
+  recieverStatus: $Enums.TradeStatus | null
+  senderStatus: $Enums.TradeStatus | null
+  status: $Enums.TradeStatus | null
+  selectedCoin: string | null
+  network: string | null
+  canCallSupport: boolean | null
+  senderId: string | null
+  recieverId: string | null
 }
 
 export type TradeMaxAggregateOutputType = {
   id: number | null
+  channelId: string | null
+  recieverStatus: $Enums.TradeStatus | null
+  senderStatus: $Enums.TradeStatus | null
+  status: $Enums.TradeStatus | null
+  selectedCoin: string | null
+  network: string | null
+  canCallSupport: boolean | null
+  senderId: string | null
+  recieverId: string | null
 }
 
 export type TradeCountAggregateOutputType = {
   id: number
+  channelId: number
+  recieverStatus: number
+  senderStatus: number
+  status: number
+  selectedCoin: number
+  network: number
+  canCallSupport: number
+  senderId: number
+  recieverId: number
   _all: number
 }
 
@@ -58,14 +85,41 @@ export type TradeSumAggregateInputType = {
 
 export type TradeMinAggregateInputType = {
   id?: true
+  channelId?: true
+  recieverStatus?: true
+  senderStatus?: true
+  status?: true
+  selectedCoin?: true
+  network?: true
+  canCallSupport?: true
+  senderId?: true
+  recieverId?: true
 }
 
 export type TradeMaxAggregateInputType = {
   id?: true
+  channelId?: true
+  recieverStatus?: true
+  senderStatus?: true
+  status?: true
+  selectedCoin?: true
+  network?: true
+  canCallSupport?: true
+  senderId?: true
+  recieverId?: true
 }
 
 export type TradeCountAggregateInputType = {
   id?: true
+  channelId?: true
+  recieverStatus?: true
+  senderStatus?: true
+  status?: true
+  selectedCoin?: true
+  network?: true
+  canCallSupport?: true
+  senderId?: true
+  recieverId?: true
   _all?: true
 }
 
@@ -157,6 +211,15 @@ export type TradeGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 
 export type TradeGroupByOutputType = {
   id: number
+  channelId: string
+  recieverStatus: $Enums.TradeStatus
+  senderStatus: $Enums.TradeStatus
+  status: $Enums.TradeStatus
+  selectedCoin: string
+  network: string
+  canCallSupport: boolean
+  senderId: string | null
+  recieverId: string | null
   _count: TradeCountAggregateOutputType | null
   _avg: TradeAvgAggregateOutputType | null
   _sum: TradeSumAggregateOutputType | null
@@ -184,21 +247,63 @@ export type TradeWhereInput = {
   OR?: Prisma.TradeWhereInput[]
   NOT?: Prisma.TradeWhereInput | Prisma.TradeWhereInput[]
   id?: Prisma.IntFilter<"Trade"> | number
+  channelId?: Prisma.StringFilter<"Trade"> | string
+  recieverStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFilter<"Trade"> | string
+  network?: Prisma.StringFilter<"Trade"> | string
+  canCallSupport?: Prisma.BoolFilter<"Trade"> | boolean
+  senderId?: Prisma.StringNullableFilter<"Trade"> | string | null
+  recieverId?: Prisma.StringNullableFilter<"Trade"> | string | null
+  sender?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  reciever?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type TradeOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  channelId?: Prisma.SortOrder
+  recieverStatus?: Prisma.SortOrder
+  senderStatus?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  selectedCoin?: Prisma.SortOrder
+  network?: Prisma.SortOrder
+  canCallSupport?: Prisma.SortOrder
+  senderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  recieverId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sender?: Prisma.UserOrderByWithRelationInput
+  reciever?: Prisma.UserOrderByWithRelationInput
 }
 
 export type TradeWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  channelId?: string
   AND?: Prisma.TradeWhereInput | Prisma.TradeWhereInput[]
   OR?: Prisma.TradeWhereInput[]
   NOT?: Prisma.TradeWhereInput | Prisma.TradeWhereInput[]
-}, "id">
+  recieverStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFilter<"Trade"> | string
+  network?: Prisma.StringFilter<"Trade"> | string
+  canCallSupport?: Prisma.BoolFilter<"Trade"> | boolean
+  senderId?: Prisma.StringNullableFilter<"Trade"> | string | null
+  recieverId?: Prisma.StringNullableFilter<"Trade"> | string | null
+  sender?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  reciever?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+}, "id" | "channelId">
 
 export type TradeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  channelId?: Prisma.SortOrder
+  recieverStatus?: Prisma.SortOrder
+  senderStatus?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  selectedCoin?: Prisma.SortOrder
+  network?: Prisma.SortOrder
+  canCallSupport?: Prisma.SortOrder
+  senderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  recieverId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TradeCountOrderByAggregateInput
   _avg?: Prisma.TradeAvgOrderByAggregateInput
   _max?: Prisma.TradeMaxOrderByAggregateInput
@@ -211,38 +316,124 @@ export type TradeScalarWhereWithAggregatesInput = {
   OR?: Prisma.TradeScalarWhereWithAggregatesInput[]
   NOT?: Prisma.TradeScalarWhereWithAggregatesInput | Prisma.TradeScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Trade"> | number
+  channelId?: Prisma.StringWithAggregatesFilter<"Trade"> | string
+  recieverStatus?: Prisma.EnumTradeStatusWithAggregatesFilter<"Trade"> | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusWithAggregatesFilter<"Trade"> | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusWithAggregatesFilter<"Trade"> | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringWithAggregatesFilter<"Trade"> | string
+  network?: Prisma.StringWithAggregatesFilter<"Trade"> | string
+  canCallSupport?: Prisma.BoolWithAggregatesFilter<"Trade"> | boolean
+  senderId?: Prisma.StringNullableWithAggregatesFilter<"Trade"> | string | null
+  recieverId?: Prisma.StringNullableWithAggregatesFilter<"Trade"> | string | null
 }
 
 export type TradeCreateInput = {
-
+  channelId: string
+  recieverStatus?: $Enums.TradeStatus
+  senderStatus?: $Enums.TradeStatus
+  status?: $Enums.TradeStatus
+  selectedCoin: string
+  network: string
+  canCallSupport?: boolean
+  sender?: Prisma.UserCreateNestedOneWithoutSentTradesInput
+  reciever?: Prisma.UserCreateNestedOneWithoutReceivedTradesInput
 }
 
 export type TradeUncheckedCreateInput = {
   id?: number
+  channelId: string
+  recieverStatus?: $Enums.TradeStatus
+  senderStatus?: $Enums.TradeStatus
+  status?: $Enums.TradeStatus
+  selectedCoin: string
+  network: string
+  canCallSupport?: boolean
+  senderId?: string | null
+  recieverId?: string | null
 }
 
 export type TradeUpdateInput = {
-
+  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
+  network?: Prisma.StringFieldUpdateOperationsInput | string
+  canCallSupport?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sender?: Prisma.UserUpdateOneWithoutSentTradesNestedInput
+  reciever?: Prisma.UserUpdateOneWithoutReceivedTradesNestedInput
 }
 
 export type TradeUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
+  network?: Prisma.StringFieldUpdateOperationsInput | string
+  canCallSupport?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeCreateManyInput = {
   id?: number
+  channelId: string
+  recieverStatus?: $Enums.TradeStatus
+  senderStatus?: $Enums.TradeStatus
+  status?: $Enums.TradeStatus
+  selectedCoin: string
+  network: string
+  canCallSupport?: boolean
+  senderId?: string | null
+  recieverId?: string | null
 }
 
 export type TradeUpdateManyMutationInput = {
-
+  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
+  network?: Prisma.StringFieldUpdateOperationsInput | string
+  canCallSupport?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type TradeUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
+  network?: Prisma.StringFieldUpdateOperationsInput | string
+  canCallSupport?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type TradeListRelationFilter = {
+  every?: Prisma.TradeWhereInput
+  some?: Prisma.TradeWhereInput
+  none?: Prisma.TradeWhereInput
+}
+
+export type TradeOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type TradeCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  channelId?: Prisma.SortOrder
+  recieverStatus?: Prisma.SortOrder
+  senderStatus?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  selectedCoin?: Prisma.SortOrder
+  network?: Prisma.SortOrder
+  canCallSupport?: Prisma.SortOrder
+  senderId?: Prisma.SortOrder
+  recieverId?: Prisma.SortOrder
 }
 
 export type TradeAvgOrderByAggregateInput = {
@@ -251,41 +442,427 @@ export type TradeAvgOrderByAggregateInput = {
 
 export type TradeMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  channelId?: Prisma.SortOrder
+  recieverStatus?: Prisma.SortOrder
+  senderStatus?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  selectedCoin?: Prisma.SortOrder
+  network?: Prisma.SortOrder
+  canCallSupport?: Prisma.SortOrder
+  senderId?: Prisma.SortOrder
+  recieverId?: Prisma.SortOrder
 }
 
 export type TradeMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  channelId?: Prisma.SortOrder
+  recieverStatus?: Prisma.SortOrder
+  senderStatus?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  selectedCoin?: Prisma.SortOrder
+  network?: Prisma.SortOrder
+  canCallSupport?: Prisma.SortOrder
+  senderId?: Prisma.SortOrder
+  recieverId?: Prisma.SortOrder
 }
 
 export type TradeSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
 }
 
+export type TradeCreateNestedManyWithoutSenderInput = {
+  create?: Prisma.XOR<Prisma.TradeCreateWithoutSenderInput, Prisma.TradeUncheckedCreateWithoutSenderInput> | Prisma.TradeCreateWithoutSenderInput[] | Prisma.TradeUncheckedCreateWithoutSenderInput[]
+  connectOrCreate?: Prisma.TradeCreateOrConnectWithoutSenderInput | Prisma.TradeCreateOrConnectWithoutSenderInput[]
+  createMany?: Prisma.TradeCreateManySenderInputEnvelope
+  connect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+}
+
+export type TradeCreateNestedManyWithoutRecieverInput = {
+  create?: Prisma.XOR<Prisma.TradeCreateWithoutRecieverInput, Prisma.TradeUncheckedCreateWithoutRecieverInput> | Prisma.TradeCreateWithoutRecieverInput[] | Prisma.TradeUncheckedCreateWithoutRecieverInput[]
+  connectOrCreate?: Prisma.TradeCreateOrConnectWithoutRecieverInput | Prisma.TradeCreateOrConnectWithoutRecieverInput[]
+  createMany?: Prisma.TradeCreateManyRecieverInputEnvelope
+  connect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+}
+
+export type TradeUncheckedCreateNestedManyWithoutSenderInput = {
+  create?: Prisma.XOR<Prisma.TradeCreateWithoutSenderInput, Prisma.TradeUncheckedCreateWithoutSenderInput> | Prisma.TradeCreateWithoutSenderInput[] | Prisma.TradeUncheckedCreateWithoutSenderInput[]
+  connectOrCreate?: Prisma.TradeCreateOrConnectWithoutSenderInput | Prisma.TradeCreateOrConnectWithoutSenderInput[]
+  createMany?: Prisma.TradeCreateManySenderInputEnvelope
+  connect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+}
+
+export type TradeUncheckedCreateNestedManyWithoutRecieverInput = {
+  create?: Prisma.XOR<Prisma.TradeCreateWithoutRecieverInput, Prisma.TradeUncheckedCreateWithoutRecieverInput> | Prisma.TradeCreateWithoutRecieverInput[] | Prisma.TradeUncheckedCreateWithoutRecieverInput[]
+  connectOrCreate?: Prisma.TradeCreateOrConnectWithoutRecieverInput | Prisma.TradeCreateOrConnectWithoutRecieverInput[]
+  createMany?: Prisma.TradeCreateManyRecieverInputEnvelope
+  connect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+}
+
+export type TradeUpdateManyWithoutSenderNestedInput = {
+  create?: Prisma.XOR<Prisma.TradeCreateWithoutSenderInput, Prisma.TradeUncheckedCreateWithoutSenderInput> | Prisma.TradeCreateWithoutSenderInput[] | Prisma.TradeUncheckedCreateWithoutSenderInput[]
+  connectOrCreate?: Prisma.TradeCreateOrConnectWithoutSenderInput | Prisma.TradeCreateOrConnectWithoutSenderInput[]
+  upsert?: Prisma.TradeUpsertWithWhereUniqueWithoutSenderInput | Prisma.TradeUpsertWithWhereUniqueWithoutSenderInput[]
+  createMany?: Prisma.TradeCreateManySenderInputEnvelope
+  set?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  disconnect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  delete?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  connect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  update?: Prisma.TradeUpdateWithWhereUniqueWithoutSenderInput | Prisma.TradeUpdateWithWhereUniqueWithoutSenderInput[]
+  updateMany?: Prisma.TradeUpdateManyWithWhereWithoutSenderInput | Prisma.TradeUpdateManyWithWhereWithoutSenderInput[]
+  deleteMany?: Prisma.TradeScalarWhereInput | Prisma.TradeScalarWhereInput[]
+}
+
+export type TradeUpdateManyWithoutRecieverNestedInput = {
+  create?: Prisma.XOR<Prisma.TradeCreateWithoutRecieverInput, Prisma.TradeUncheckedCreateWithoutRecieverInput> | Prisma.TradeCreateWithoutRecieverInput[] | Prisma.TradeUncheckedCreateWithoutRecieverInput[]
+  connectOrCreate?: Prisma.TradeCreateOrConnectWithoutRecieverInput | Prisma.TradeCreateOrConnectWithoutRecieverInput[]
+  upsert?: Prisma.TradeUpsertWithWhereUniqueWithoutRecieverInput | Prisma.TradeUpsertWithWhereUniqueWithoutRecieverInput[]
+  createMany?: Prisma.TradeCreateManyRecieverInputEnvelope
+  set?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  disconnect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  delete?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  connect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  update?: Prisma.TradeUpdateWithWhereUniqueWithoutRecieverInput | Prisma.TradeUpdateWithWhereUniqueWithoutRecieverInput[]
+  updateMany?: Prisma.TradeUpdateManyWithWhereWithoutRecieverInput | Prisma.TradeUpdateManyWithWhereWithoutRecieverInput[]
+  deleteMany?: Prisma.TradeScalarWhereInput | Prisma.TradeScalarWhereInput[]
+}
+
+export type TradeUncheckedUpdateManyWithoutSenderNestedInput = {
+  create?: Prisma.XOR<Prisma.TradeCreateWithoutSenderInput, Prisma.TradeUncheckedCreateWithoutSenderInput> | Prisma.TradeCreateWithoutSenderInput[] | Prisma.TradeUncheckedCreateWithoutSenderInput[]
+  connectOrCreate?: Prisma.TradeCreateOrConnectWithoutSenderInput | Prisma.TradeCreateOrConnectWithoutSenderInput[]
+  upsert?: Prisma.TradeUpsertWithWhereUniqueWithoutSenderInput | Prisma.TradeUpsertWithWhereUniqueWithoutSenderInput[]
+  createMany?: Prisma.TradeCreateManySenderInputEnvelope
+  set?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  disconnect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  delete?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  connect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  update?: Prisma.TradeUpdateWithWhereUniqueWithoutSenderInput | Prisma.TradeUpdateWithWhereUniqueWithoutSenderInput[]
+  updateMany?: Prisma.TradeUpdateManyWithWhereWithoutSenderInput | Prisma.TradeUpdateManyWithWhereWithoutSenderInput[]
+  deleteMany?: Prisma.TradeScalarWhereInput | Prisma.TradeScalarWhereInput[]
+}
+
+export type TradeUncheckedUpdateManyWithoutRecieverNestedInput = {
+  create?: Prisma.XOR<Prisma.TradeCreateWithoutRecieverInput, Prisma.TradeUncheckedCreateWithoutRecieverInput> | Prisma.TradeCreateWithoutRecieverInput[] | Prisma.TradeUncheckedCreateWithoutRecieverInput[]
+  connectOrCreate?: Prisma.TradeCreateOrConnectWithoutRecieverInput | Prisma.TradeCreateOrConnectWithoutRecieverInput[]
+  upsert?: Prisma.TradeUpsertWithWhereUniqueWithoutRecieverInput | Prisma.TradeUpsertWithWhereUniqueWithoutRecieverInput[]
+  createMany?: Prisma.TradeCreateManyRecieverInputEnvelope
+  set?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  disconnect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  delete?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  connect?: Prisma.TradeWhereUniqueInput | Prisma.TradeWhereUniqueInput[]
+  update?: Prisma.TradeUpdateWithWhereUniqueWithoutRecieverInput | Prisma.TradeUpdateWithWhereUniqueWithoutRecieverInput[]
+  updateMany?: Prisma.TradeUpdateManyWithWhereWithoutRecieverInput | Prisma.TradeUpdateManyWithWhereWithoutRecieverInput[]
+  deleteMany?: Prisma.TradeScalarWhereInput | Prisma.TradeScalarWhereInput[]
+}
+
+export type EnumTradeStatusFieldUpdateOperationsInput = {
+  set?: $Enums.TradeStatus
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type TradeCreateWithoutSenderInput = {
+  channelId: string
+  recieverStatus?: $Enums.TradeStatus
+  senderStatus?: $Enums.TradeStatus
+  status?: $Enums.TradeStatus
+  selectedCoin: string
+  network: string
+  canCallSupport?: boolean
+  reciever?: Prisma.UserCreateNestedOneWithoutReceivedTradesInput
+}
+
+export type TradeUncheckedCreateWithoutSenderInput = {
+  id?: number
+  channelId: string
+  recieverStatus?: $Enums.TradeStatus
+  senderStatus?: $Enums.TradeStatus
+  status?: $Enums.TradeStatus
+  selectedCoin: string
+  network: string
+  canCallSupport?: boolean
+  recieverId?: string | null
+}
+
+export type TradeCreateOrConnectWithoutSenderInput = {
+  where: Prisma.TradeWhereUniqueInput
+  create: Prisma.XOR<Prisma.TradeCreateWithoutSenderInput, Prisma.TradeUncheckedCreateWithoutSenderInput>
+}
+
+export type TradeCreateManySenderInputEnvelope = {
+  data: Prisma.TradeCreateManySenderInput | Prisma.TradeCreateManySenderInput[]
+}
+
+export type TradeCreateWithoutRecieverInput = {
+  channelId: string
+  recieverStatus?: $Enums.TradeStatus
+  senderStatus?: $Enums.TradeStatus
+  status?: $Enums.TradeStatus
+  selectedCoin: string
+  network: string
+  canCallSupport?: boolean
+  sender?: Prisma.UserCreateNestedOneWithoutSentTradesInput
+}
+
+export type TradeUncheckedCreateWithoutRecieverInput = {
+  id?: number
+  channelId: string
+  recieverStatus?: $Enums.TradeStatus
+  senderStatus?: $Enums.TradeStatus
+  status?: $Enums.TradeStatus
+  selectedCoin: string
+  network: string
+  canCallSupport?: boolean
+  senderId?: string | null
+}
+
+export type TradeCreateOrConnectWithoutRecieverInput = {
+  where: Prisma.TradeWhereUniqueInput
+  create: Prisma.XOR<Prisma.TradeCreateWithoutRecieverInput, Prisma.TradeUncheckedCreateWithoutRecieverInput>
+}
+
+export type TradeCreateManyRecieverInputEnvelope = {
+  data: Prisma.TradeCreateManyRecieverInput | Prisma.TradeCreateManyRecieverInput[]
+}
+
+export type TradeUpsertWithWhereUniqueWithoutSenderInput = {
+  where: Prisma.TradeWhereUniqueInput
+  update: Prisma.XOR<Prisma.TradeUpdateWithoutSenderInput, Prisma.TradeUncheckedUpdateWithoutSenderInput>
+  create: Prisma.XOR<Prisma.TradeCreateWithoutSenderInput, Prisma.TradeUncheckedCreateWithoutSenderInput>
+}
+
+export type TradeUpdateWithWhereUniqueWithoutSenderInput = {
+  where: Prisma.TradeWhereUniqueInput
+  data: Prisma.XOR<Prisma.TradeUpdateWithoutSenderInput, Prisma.TradeUncheckedUpdateWithoutSenderInput>
+}
+
+export type TradeUpdateManyWithWhereWithoutSenderInput = {
+  where: Prisma.TradeScalarWhereInput
+  data: Prisma.XOR<Prisma.TradeUpdateManyMutationInput, Prisma.TradeUncheckedUpdateManyWithoutSenderInput>
+}
+
+export type TradeScalarWhereInput = {
+  AND?: Prisma.TradeScalarWhereInput | Prisma.TradeScalarWhereInput[]
+  OR?: Prisma.TradeScalarWhereInput[]
+  NOT?: Prisma.TradeScalarWhereInput | Prisma.TradeScalarWhereInput[]
+  id?: Prisma.IntFilter<"Trade"> | number
+  channelId?: Prisma.StringFilter<"Trade"> | string
+  recieverStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFilter<"Trade"> | string
+  network?: Prisma.StringFilter<"Trade"> | string
+  canCallSupport?: Prisma.BoolFilter<"Trade"> | boolean
+  senderId?: Prisma.StringNullableFilter<"Trade"> | string | null
+  recieverId?: Prisma.StringNullableFilter<"Trade"> | string | null
+}
+
+export type TradeUpsertWithWhereUniqueWithoutRecieverInput = {
+  where: Prisma.TradeWhereUniqueInput
+  update: Prisma.XOR<Prisma.TradeUpdateWithoutRecieverInput, Prisma.TradeUncheckedUpdateWithoutRecieverInput>
+  create: Prisma.XOR<Prisma.TradeCreateWithoutRecieverInput, Prisma.TradeUncheckedCreateWithoutRecieverInput>
+}
+
+export type TradeUpdateWithWhereUniqueWithoutRecieverInput = {
+  where: Prisma.TradeWhereUniqueInput
+  data: Prisma.XOR<Prisma.TradeUpdateWithoutRecieverInput, Prisma.TradeUncheckedUpdateWithoutRecieverInput>
+}
+
+export type TradeUpdateManyWithWhereWithoutRecieverInput = {
+  where: Prisma.TradeScalarWhereInput
+  data: Prisma.XOR<Prisma.TradeUpdateManyMutationInput, Prisma.TradeUncheckedUpdateManyWithoutRecieverInput>
+}
+
+export type TradeCreateManySenderInput = {
+  id?: number
+  channelId: string
+  recieverStatus?: $Enums.TradeStatus
+  senderStatus?: $Enums.TradeStatus
+  status?: $Enums.TradeStatus
+  selectedCoin: string
+  network: string
+  canCallSupport?: boolean
+  recieverId?: string | null
+}
+
+export type TradeCreateManyRecieverInput = {
+  id?: number
+  channelId: string
+  recieverStatus?: $Enums.TradeStatus
+  senderStatus?: $Enums.TradeStatus
+  status?: $Enums.TradeStatus
+  selectedCoin: string
+  network: string
+  canCallSupport?: boolean
+  senderId?: string | null
+}
+
+export type TradeUpdateWithoutSenderInput = {
+  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
+  network?: Prisma.StringFieldUpdateOperationsInput | string
+  canCallSupport?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reciever?: Prisma.UserUpdateOneWithoutReceivedTradesNestedInput
+}
+
+export type TradeUncheckedUpdateWithoutSenderInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
+  network?: Prisma.StringFieldUpdateOperationsInput | string
+  canCallSupport?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  recieverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type TradeUncheckedUpdateManyWithoutSenderInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
+  network?: Prisma.StringFieldUpdateOperationsInput | string
+  canCallSupport?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  recieverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type TradeUpdateWithoutRecieverInput = {
+  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
+  network?: Prisma.StringFieldUpdateOperationsInput | string
+  canCallSupport?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sender?: Prisma.UserUpdateOneWithoutSentTradesNestedInput
+}
+
+export type TradeUncheckedUpdateWithoutRecieverInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
+  network?: Prisma.StringFieldUpdateOperationsInput | string
+  canCallSupport?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type TradeUncheckedUpdateManyWithoutRecieverInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  status?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
+  network?: Prisma.StringFieldUpdateOperationsInput | string
+  canCallSupport?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  senderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
 
 
 export type TradeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  channelId?: boolean
+  recieverStatus?: boolean
+  senderStatus?: boolean
+  status?: boolean
+  selectedCoin?: boolean
+  network?: boolean
+  canCallSupport?: boolean
+  senderId?: boolean
+  recieverId?: boolean
+  sender?: boolean | Prisma.Trade$senderArgs<ExtArgs>
+  reciever?: boolean | Prisma.Trade$recieverArgs<ExtArgs>
 }, ExtArgs["result"]["trade"]>
 
 export type TradeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  channelId?: boolean
+  recieverStatus?: boolean
+  senderStatus?: boolean
+  status?: boolean
+  selectedCoin?: boolean
+  network?: boolean
+  canCallSupport?: boolean
+  senderId?: boolean
+  recieverId?: boolean
+  sender?: boolean | Prisma.Trade$senderArgs<ExtArgs>
+  reciever?: boolean | Prisma.Trade$recieverArgs<ExtArgs>
 }, ExtArgs["result"]["trade"]>
 
 export type TradeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  channelId?: boolean
+  recieverStatus?: boolean
+  senderStatus?: boolean
+  status?: boolean
+  selectedCoin?: boolean
+  network?: boolean
+  canCallSupport?: boolean
+  senderId?: boolean
+  recieverId?: boolean
+  sender?: boolean | Prisma.Trade$senderArgs<ExtArgs>
+  reciever?: boolean | Prisma.Trade$recieverArgs<ExtArgs>
 }, ExtArgs["result"]["trade"]>
 
 export type TradeSelectScalar = {
   id?: boolean
+  channelId?: boolean
+  recieverStatus?: boolean
+  senderStatus?: boolean
+  status?: boolean
+  selectedCoin?: boolean
+  network?: boolean
+  canCallSupport?: boolean
+  senderId?: boolean
+  recieverId?: boolean
 }
 
-export type TradeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id", ExtArgs["result"]["trade"]>
+export type TradeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "channelId" | "recieverStatus" | "senderStatus" | "status" | "selectedCoin" | "network" | "canCallSupport" | "senderId" | "recieverId", ExtArgs["result"]["trade"]>
+export type TradeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  sender?: boolean | Prisma.Trade$senderArgs<ExtArgs>
+  reciever?: boolean | Prisma.Trade$recieverArgs<ExtArgs>
+}
+export type TradeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  sender?: boolean | Prisma.Trade$senderArgs<ExtArgs>
+  reciever?: boolean | Prisma.Trade$recieverArgs<ExtArgs>
+}
+export type TradeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  sender?: boolean | Prisma.Trade$senderArgs<ExtArgs>
+  reciever?: boolean | Prisma.Trade$recieverArgs<ExtArgs>
+}
 
 export type $TradePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Trade"
-  objects: {}
+  objects: {
+    sender: Prisma.$UserPayload<ExtArgs> | null
+    reciever: Prisma.$UserPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
+    channelId: string
+    recieverStatus: $Enums.TradeStatus
+    senderStatus: $Enums.TradeStatus
+    status: $Enums.TradeStatus
+    selectedCoin: string
+    network: string
+    canCallSupport: boolean
+    senderId: string | null
+    recieverId: string | null
   }, ExtArgs["result"]["trade"]>
   composites: {}
 }
@@ -680,6 +1257,8 @@ readonly fields: TradeFieldRefs;
  */
 export interface Prisma__TradeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  sender<T extends Prisma.Trade$senderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Trade$senderArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  reciever<T extends Prisma.Trade$recieverArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Trade$recieverArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -710,6 +1289,15 @@ export interface Prisma__TradeClient<T, Null = never, ExtArgs extends runtime.Ty
  */
 export interface TradeFieldRefs {
   readonly id: Prisma.FieldRef<"Trade", 'Int'>
+  readonly channelId: Prisma.FieldRef<"Trade", 'String'>
+  readonly recieverStatus: Prisma.FieldRef<"Trade", 'TradeStatus'>
+  readonly senderStatus: Prisma.FieldRef<"Trade", 'TradeStatus'>
+  readonly status: Prisma.FieldRef<"Trade", 'TradeStatus'>
+  readonly selectedCoin: Prisma.FieldRef<"Trade", 'String'>
+  readonly network: Prisma.FieldRef<"Trade", 'String'>
+  readonly canCallSupport: Prisma.FieldRef<"Trade", 'Boolean'>
+  readonly senderId: Prisma.FieldRef<"Trade", 'String'>
+  readonly recieverId: Prisma.FieldRef<"Trade", 'String'>
 }
     
 
@@ -726,6 +1314,10 @@ export type TradeFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the Trade
    */
   omit?: Prisma.TradeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeInclude<ExtArgs> | null
   /**
    * Filter, which Trade to fetch.
    */
@@ -745,6 +1337,10 @@ export type TradeFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.TradeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeInclude<ExtArgs> | null
+  /**
    * Filter, which Trade to fetch.
    */
   where: Prisma.TradeWhereUniqueInput
@@ -762,6 +1358,10 @@ export type TradeFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the Trade
    */
   omit?: Prisma.TradeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeInclude<ExtArgs> | null
   /**
    * Filter, which Trade to fetch.
    */
@@ -811,6 +1411,10 @@ export type TradeFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.TradeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeInclude<ExtArgs> | null
+  /**
    * Filter, which Trade to fetch.
    */
   where?: Prisma.TradeWhereInput
@@ -858,6 +1462,10 @@ export type TradeFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Omit specific fields from the Trade
    */
   omit?: Prisma.TradeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeInclude<ExtArgs> | null
   /**
    * Filter, which Trades to fetch.
    */
@@ -907,9 +1515,13 @@ export type TradeCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   omit?: Prisma.TradeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeInclude<ExtArgs> | null
+  /**
    * The data needed to create a Trade.
    */
-  data?: Prisma.XOR<Prisma.TradeCreateInput, Prisma.TradeUncheckedCreateInput>
+  data: Prisma.XOR<Prisma.TradeCreateInput, Prisma.TradeUncheckedCreateInput>
 }
 
 /**
@@ -938,6 +1550,10 @@ export type TradeCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many Trades.
    */
   data: Prisma.TradeCreateManyInput | Prisma.TradeCreateManyInput[]
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -952,6 +1568,10 @@ export type TradeUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the Trade
    */
   omit?: Prisma.TradeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeInclude<ExtArgs> | null
   /**
    * The data needed to update a Trade.
    */
@@ -1004,6 +1624,10 @@ export type TradeUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many Trades to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1018,6 +1642,10 @@ export type TradeUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the Trade
    */
   omit?: Prisma.TradeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeInclude<ExtArgs> | null
   /**
    * The filter to search for the Trade to update in case it exists.
    */
@@ -1045,6 +1673,10 @@ export type TradeDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   omit?: Prisma.TradeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeInclude<ExtArgs> | null
+  /**
    * Filter which Trade to delete.
    */
   where: Prisma.TradeWhereUniqueInput
@@ -1065,6 +1697,44 @@ export type TradeDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
+ * Trade.sender
+ */
+export type Trade$senderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * Trade.reciever
+ */
+export type Trade$recieverArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
  * Trade without action
  */
 export type TradeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1076,4 +1746,8 @@ export type TradeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    * Omit specific fields from the Trade
    */
   omit?: Prisma.TradeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TradeInclude<ExtArgs> | null
 }

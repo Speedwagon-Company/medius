@@ -3,8 +3,15 @@ import { mainnet, sepolia } from 'viem/chains';
 import { HttpRpcClient, parseEther } from 'viem/utils';
 import { sleep } from './index';
 import { privateKeyToAccount } from 'viem/accounts';
-
-export const ethHttp: PublicClient = createPublicClient({transport:http(process.env.RPC_URL)})
+// transport:http(process.env.RPC_URL),
+export const ethHttp = createPublicClient({
+    chain: sepolia,
+    transport: http(process.env.RPC_URL, {
+        timeout: 60000, 
+        retryCount: 3,
+        retryDelay: 1000,
+    }),
+});
 const MM_ADDRESS = process.env.OWNER_WALLET || ""
 const mmAcc = privateKeyToAccount(`0x${process.env.PRIVATE_WALLET_KEY}`)
 const mmAccClient = createWalletClient({
@@ -48,6 +55,7 @@ export async function waitForTransaction(wallet: string): Promise<Transaction> {
   while(true) {
     const trans = transactions.get(wallet.toLowerCase()) 
     if(trans){
+      transactions.delete(wallet.toLowerCase())
       return trans
     }
     await sleep(1000)

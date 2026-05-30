@@ -1,0 +1,18 @@
+-- RedefineTables
+PRAGMA defer_foreign_keys=ON;
+PRAGMA foreign_keys=OFF;
+CREATE TABLE "new_Trade" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "channelId" INTEGER NOT NULL,
+    "recieverStatus" TEXT NOT NULL DEFAULT 'WAITING',
+    "senderStatus" TEXT NOT NULL DEFAULT 'WAITING',
+    "senderId" INTEGER,
+    "recieverId" INTEGER,
+    CONSTRAINT "Trade_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User" ("discordId") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT "Trade_recieverId_fkey" FOREIGN KEY ("recieverId") REFERENCES "User" ("discordId") ON DELETE SET NULL ON UPDATE CASCADE
+);
+INSERT INTO "new_Trade" ("channelId", "id", "recieverId", "recieverStatus", "senderId", "senderStatus") SELECT "channelId", "id", "recieverId", "recieverStatus", "senderId", "senderStatus" FROM "Trade";
+DROP TABLE "Trade";
+ALTER TABLE "new_Trade" RENAME TO "Trade";
+PRAGMA foreign_keys=ON;
+PRAGMA defer_foreign_keys=OFF;

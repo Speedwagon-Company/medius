@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "tsx src-ts/index.ts"
+    "start": "tsx src-ts/index.ts",
+    "start:debug": "tsx --inspect=9229 src/index.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.8.0",
