@@ -5,6 +5,8 @@ import { pathToFileURL } from 'url';
 import 'dotenv/config';
 import { watchMMWalletTrans } from './utils/crypto';
 import prisma from './db';
+const express = require("express")
+const app = express()
 
 class MyClient extends Client {
     commands = new Collection<string, any>();
@@ -51,7 +53,7 @@ async function init() {
     new Promise(async (res) => {
         const cfg = await prisma.config.findFirst()
         console.log(cfg, !cfg)
-        if(cfg) {
+        if(cfg === null) {
             await prisma.config.create({data:{embed_suc_color:"0xff1a18"}})
             console.log("created")
             return res
@@ -109,6 +111,24 @@ client.on(Events.InteractionCreate, async (interaction) => {
         else await interaction.reply(reply);
     }
 });
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('КРИТИЧЕСКАЯ ОШИБКА (Unhandled Rejection):');
+    console.error(reason);
 
-// Запуск
+});
+
 init();
+
+app.get("/users/:id", async (req: any,res: any) => {
+    const user = await prisma.user.findFirst({where:{discordId:req.params.id}, include:{sentTrades:true, receivedTrades:true}})
+    res.json(user)
+})
+
+app.get("/trades/:id", async (req: any, res: any) => {
+    const trade = await prisma.trade.findFirst({where:{id:parseInt(req.params.id)}, include:{sender:true, reciever:true}})
+    res.json(trade)
+})
+
+app.listen(3000, () => {
+    console.log("express is running")
+})

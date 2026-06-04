@@ -1,9 +1,10 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, Channel, MessageFlags, ButtonBuilder, ActionRowBuilder, ButtonStyle, ComponentType, ButtonInteraction, ThreadChannel, Message } from 'discord.js';
 import prisma from '../db';
-import { Config } from '../generated/prisma/client';
+import { Config, TradeStatus } from '../generated/prisma/client';
 import { randomUUID, UUID } from 'node:crypto';
 import { createSuccessEmbed } from '../utils/dis';
 import { trades } from './trade';
+import * as tradeService from "../services/trade"
 
 type SubcommandFn = (interaction: ChatInputCommandInteraction) => Promise<any>;
 const SUP_REQ_CHAN_ID = "1505282213577490553"
@@ -18,14 +19,18 @@ const handlers: Record<string, SubcommandFn> = {
         if(channel.name.split("-")[0] !== "trade") {
             return await interaction.reply({content:"You are not in trade room", flags:MessageFlags.Ephemeral})
         }
-        const trade = trades.get(channel.id)
-        if(!trade?.canCallSupport) {
+        const trade = await tradeService.get(channel.id)
+        console.log(trade)
+        if(trade?.status !== TradeStatus.SUPPORT_REQUEST) {
             return await interaction.reply({content:"You cant call support",flags:MessageFlags.Ephemeral}, )
         }
+        if(trade?.calledSupport) {
+            return await interaction.reply({content:"You already called support in this trade", flags: MessageFlags.Ephemeral})
+        }
 
-
+        await tradeService.update({calledSupport:true}, channel.id)
         let reason = interaction.options.getString("reason")
-        if(reason == null) {
+        if(reason === null || reason === undefined) {
             reason = "Not given"
         }
         const id = randomUUID()
@@ -34,15 +39,22 @@ const handlers: Record<string, SubcommandFn> = {
         const embed = await createSuccessEmbed(`Support request`, `User ${interaction.user.username} requested support \nReason: ${reason}`)
         const message: Message = await supportReqChan.send({ embeds:[embed],components:[row]})
         await interaction.reply({content:`<@${interaction.user.id}> called support`})
+        const invited = new Set<String>()
         return new Promise((res,rej) => {
             const collector = message.createMessageComponentCollector({
                 componentType: ComponentType.Button,
                 time: 0, 
             });
+            
             collector.on("collect", async (button: ButtonInteraction) => { 
                 if(button.customId === id) {
-                    if(channel.members.cache.has(interaction.member?.user.id)){
-                        return await interaction.reply({content:"You already in this channel",flags:MessageFlags.Ephemeral}, )
+                    const userId = button.user.id || ""
+                    if(userId === ""){
+                        return await button.reply({content:"Error happend", flags:MessageFlags.Ephemeral})
+                    }
+                    invited.add(userId)
+                    if(invited.has(userId)){
+                        return await button.reply({content:"You already in this channel",flags:MessageFlags.Ephemeral}, )
                     }
                     // row.components.forEach((v: ButtonBuilder) => v.setDisabled(true))
                     await channel.members.add(interaction.user)

@@ -25,28 +25,41 @@ enum TradeStatus {
   WAITING
   CONFIRMED
   CANCELLED
+  SUPPORT_REQUEST
 }
 
 model Trade {
   id     Int    @id @default(autoincrement())
   channelId String @unique
+
   sender User? @relation(name: "sender", fields: [senderId], references: [discordId])
   reciever User? @relation(name: "reciever", fields: [recieverId], references: [discordId])
   recieverStatus TradeStatus @default(WAITING)
   senderStatus TradeStatus @default(WAITING)
 
-  status TradeStatus @default(WAITING)
+  status String  @default("WAITING")
   selectedCoin String
   network String
-  canCallSupport Boolean @default(false)
+  calledSupport Boolean @default(false)
+
+  received String?
+  
+  hideSender Boolean @default(false)
+  hideReciever Boolean @default(false)
 
   senderId String?
   recieverId String?
 
+  createdAt DateTime @default(now())
 
 }
 
 model Config {
   id              Int    @id @default(autoincrement())
+  guildId String? @unique
+
+  publicLogChanId String?
+  privateLogChanId String?
+
   embed_suc_color String
 }

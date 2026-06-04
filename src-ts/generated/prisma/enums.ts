@@ -12,7 +12,8 @@
 export const TradeStatus = {
   WAITING: 'WAITING',
   CONFIRMED: 'CONFIRMED',
-  CANCELLED: 'CANCELLED'
+  CANCELLED: 'CANCELLED',
+  SUPPORT_REQUEST: 'SUPPORT_REQUEST'
 } as const
 
 export type TradeStatus = (typeof TradeStatus)[keyof typeof TradeStatus]

@@ -29,6 +29,11 @@ export const data = new SlashCommandBuilder()
                     .setRequired(true)
                     
             )
+    
+    )
+    .addSubcommand(sub =>
+        sub.setName("init")
+        .setDescription("init config")
     );
 
 export async function execute(interaction: ChatInputCommandInteraction) {

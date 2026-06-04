@@ -16,10 +16,10 @@
  */
 
 import * as runtime from "@prisma/client/runtime/client"
-import type * as Prisma from "../models"
-import { type PrismaClient } from "./class"
+import type * as Prisma from "../models.js"
+import { type PrismaClient } from "./class.js"
 
-export type * from '../models'
+export type * from '../models.js'
 
 export type DMMF = typeof runtime.DMMF
 
@@ -681,9 +681,13 @@ export const TradeScalarFieldEnum = {
   status: 'status',
   selectedCoin: 'selectedCoin',
   network: 'network',
-  canCallSupport: 'canCallSupport',
+  calledSupport: 'calledSupport',
+  received: 'received',
+  hideSender: 'hideSender',
+  hideReciever: 'hideReciever',
   senderId: 'senderId',
-  recieverId: 'recieverId'
+  recieverId: 'recieverId',
+  createdAt: 'createdAt'
 } as const
 
 export type TradeScalarFieldEnum = (typeof TradeScalarFieldEnum)[keyof typeof TradeScalarFieldEnum]
@@ -691,6 +695,9 @@ export type TradeScalarFieldEnum = (typeof TradeScalarFieldEnum)[keyof typeof Tr
 
 export const ConfigScalarFieldEnum = {
   id: 'id',
+  guildId: 'guildId',
+  publicLogChanId: 'publicLogChanId',
+  privateLogChanId: 'privateLogChanId',
   embed_suc_color: 'embed_suc_color'
 } as const
 
@@ -744,6 +751,13 @@ export type EnumTradeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
     
 
 

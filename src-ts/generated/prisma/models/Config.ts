@@ -9,8 +9,8 @@
  * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
-import type * as $Enums from "../enums"
-import type * as Prisma from "../internal/prismaNamespace"
+import type * as $Enums from "../enums.js"
+import type * as Prisma from "../internal/prismaNamespace.js"
 
 /**
  * Model Config
@@ -36,16 +36,25 @@ export type ConfigSumAggregateOutputType = {
 
 export type ConfigMinAggregateOutputType = {
   id: number | null
+  guildId: string | null
+  publicLogChanId: string | null
+  privateLogChanId: string | null
   embed_suc_color: string | null
 }
 
 export type ConfigMaxAggregateOutputType = {
   id: number | null
+  guildId: string | null
+  publicLogChanId: string | null
+  privateLogChanId: string | null
   embed_suc_color: string | null
 }
 
 export type ConfigCountAggregateOutputType = {
   id: number
+  guildId: number
+  publicLogChanId: number
+  privateLogChanId: number
   embed_suc_color: number
   _all: number
 }
@@ -61,16 +70,25 @@ export type ConfigSumAggregateInputType = {
 
 export type ConfigMinAggregateInputType = {
   id?: true
+  guildId?: true
+  publicLogChanId?: true
+  privateLogChanId?: true
   embed_suc_color?: true
 }
 
 export type ConfigMaxAggregateInputType = {
   id?: true
+  guildId?: true
+  publicLogChanId?: true
+  privateLogChanId?: true
   embed_suc_color?: true
 }
 
 export type ConfigCountAggregateInputType = {
   id?: true
+  guildId?: true
+  publicLogChanId?: true
+  privateLogChanId?: true
   embed_suc_color?: true
   _all?: true
 }
@@ -163,6 +181,9 @@ export type ConfigGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 
 export type ConfigGroupByOutputType = {
   id: number
+  guildId: string | null
+  publicLogChanId: string | null
+  privateLogChanId: string | null
   embed_suc_color: string
   _count: ConfigCountAggregateOutputType | null
   _avg: ConfigAvgAggregateOutputType | null
@@ -191,24 +212,36 @@ export type ConfigWhereInput = {
   OR?: Prisma.ConfigWhereInput[]
   NOT?: Prisma.ConfigWhereInput | Prisma.ConfigWhereInput[]
   id?: Prisma.IntFilter<"Config"> | number
+  guildId?: Prisma.StringNullableFilter<"Config"> | string | null
+  publicLogChanId?: Prisma.StringNullableFilter<"Config"> | string | null
+  privateLogChanId?: Prisma.StringNullableFilter<"Config"> | string | null
   embed_suc_color?: Prisma.StringFilter<"Config"> | string
 }
 
 export type ConfigOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  guildId?: Prisma.SortOrderInput | Prisma.SortOrder
+  publicLogChanId?: Prisma.SortOrderInput | Prisma.SortOrder
+  privateLogChanId?: Prisma.SortOrderInput | Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
 export type ConfigWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  guildId?: string
   AND?: Prisma.ConfigWhereInput | Prisma.ConfigWhereInput[]
   OR?: Prisma.ConfigWhereInput[]
   NOT?: Prisma.ConfigWhereInput | Prisma.ConfigWhereInput[]
+  publicLogChanId?: Prisma.StringNullableFilter<"Config"> | string | null
+  privateLogChanId?: Prisma.StringNullableFilter<"Config"> | string | null
   embed_suc_color?: Prisma.StringFilter<"Config"> | string
-}, "id">
+}, "id" | "guildId">
 
 export type ConfigOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  guildId?: Prisma.SortOrderInput | Prisma.SortOrder
+  publicLogChanId?: Prisma.SortOrderInput | Prisma.SortOrder
+  privateLogChanId?: Prisma.SortOrderInput | Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
   _count?: Prisma.ConfigCountOrderByAggregateInput
   _avg?: Prisma.ConfigAvgOrderByAggregateInput
@@ -222,43 +255,70 @@ export type ConfigScalarWhereWithAggregatesInput = {
   OR?: Prisma.ConfigScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ConfigScalarWhereWithAggregatesInput | Prisma.ConfigScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Config"> | number
+  guildId?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
+  publicLogChanId?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
+  privateLogChanId?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
   embed_suc_color?: Prisma.StringWithAggregatesFilter<"Config"> | string
 }
 
 export type ConfigCreateInput = {
+  guildId?: string | null
+  publicLogChanId?: string | null
+  privateLogChanId?: string | null
   embed_suc_color: string
 }
 
 export type ConfigUncheckedCreateInput = {
   id?: number
+  guildId?: string | null
+  publicLogChanId?: string | null
+  privateLogChanId?: string | null
   embed_suc_color: string
 }
 
 export type ConfigUpdateInput = {
+  guildId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  privateLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ConfigUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  guildId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  privateLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ConfigCreateManyInput = {
   id?: number
+  guildId?: string | null
+  publicLogChanId?: string | null
+  privateLogChanId?: string | null
   embed_suc_color: string
 }
 
 export type ConfigUpdateManyMutationInput = {
+  guildId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  privateLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ConfigUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  guildId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  privateLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ConfigCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  guildId?: Prisma.SortOrder
+  publicLogChanId?: Prisma.SortOrder
+  privateLogChanId?: Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
@@ -268,11 +328,17 @@ export type ConfigAvgOrderByAggregateInput = {
 
 export type ConfigMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  guildId?: Prisma.SortOrder
+  publicLogChanId?: Prisma.SortOrder
+  privateLogChanId?: Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
 export type ConfigMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  guildId?: Prisma.SortOrder
+  publicLogChanId?: Prisma.SortOrder
+  privateLogChanId?: Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
@@ -284,31 +350,46 @@ export type ConfigSumOrderByAggregateInput = {
 
 export type ConfigSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  guildId?: boolean
+  publicLogChanId?: boolean
+  privateLogChanId?: boolean
   embed_suc_color?: boolean
 }, ExtArgs["result"]["config"]>
 
 export type ConfigSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  guildId?: boolean
+  publicLogChanId?: boolean
+  privateLogChanId?: boolean
   embed_suc_color?: boolean
 }, ExtArgs["result"]["config"]>
 
 export type ConfigSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  guildId?: boolean
+  publicLogChanId?: boolean
+  privateLogChanId?: boolean
   embed_suc_color?: boolean
 }, ExtArgs["result"]["config"]>
 
 export type ConfigSelectScalar = {
   id?: boolean
+  guildId?: boolean
+  publicLogChanId?: boolean
+  privateLogChanId?: boolean
   embed_suc_color?: boolean
 }
 
-export type ConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "embed_suc_color", ExtArgs["result"]["config"]>
+export type ConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "guildId" | "publicLogChanId" | "privateLogChanId" | "embed_suc_color", ExtArgs["result"]["config"]>
 
 export type $ConfigPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Config"
   objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
+    guildId: string | null
+    publicLogChanId: string | null
+    privateLogChanId: string | null
     embed_suc_color: string
   }, ExtArgs["result"]["config"]>
   composites: {}
@@ -734,6 +815,9 @@ export interface Prisma__ConfigClient<T, Null = never, ExtArgs extends runtime.T
  */
 export interface ConfigFieldRefs {
   readonly id: Prisma.FieldRef<"Config", 'Int'>
+  readonly guildId: Prisma.FieldRef<"Config", 'String'>
+  readonly publicLogChanId: Prisma.FieldRef<"Config", 'String'>
+  readonly privateLogChanId: Prisma.FieldRef<"Config", 'String'>
   readonly embed_suc_color: Prisma.FieldRef<"Config", 'String'>
 }
     

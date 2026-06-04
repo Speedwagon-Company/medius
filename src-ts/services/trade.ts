@@ -10,5 +10,5 @@ export async function update(tradeData: any, channelId: string) {
 }
 
 export async function get(id: string) {
-    return await prisma.trade.findFirst({where:{channelId:id}})
+    return await prisma.trade.findFirst({where:{channelId:id}, include:{sender:true, reciever:true}})
 }

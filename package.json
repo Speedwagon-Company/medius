@@ -13,6 +13,7 @@
     "discord.js": "^14.26.2",
     "discord.ts-cogs": "^1.0.1",
     "dotenv": "^16.4.7",
+    "express": "^5.2.1",
     "reflect-metadata": "^0.2.2",
     "viem": "^2.48.11"
   },
