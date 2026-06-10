@@ -75,6 +75,7 @@ const tradeRoomId = process.env.TRADE_ROOM_ID || ""
 const SEND_WALLET_TRIES = 5;
 const COMPONENT_TIMEOUT_MS = 10 * 60 * 1000;
 const WALLET_MESSAGE_TIMEOUT_MS = 2 * 60 * 1000;
+const SUPPORT_ROLE_ID = process.env.SUPPORT_ROLE_ID || ""
 type SubcommandFn = (interaction: ChatInputCommandInteraction) => Promise<any>;
 
 const handlers: Record<string, SubcommandFn> = {
