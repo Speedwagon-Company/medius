@@ -83,9 +83,12 @@ const handlers: Record<string, SubcommandFn> = {
         if(target?.id == interaction.member?.user.id) {
             return await interaction.reply({content:"You cannot do this", flags:MessageFlags.Ephemeral} )
         }
-        // if(target?.user.bot) {
 
-        // }
+        // if(target?.user.bot)
+        // @ts-ignore
+        if (target?.bot) {
+          return await interaction.reply({content:"You cannot do this", flags:MessageFlags.Ephemeral} )
+        }
         if (!target) {
             await interaction.reply({
                 content: "Selected user was not found in this guild.",
