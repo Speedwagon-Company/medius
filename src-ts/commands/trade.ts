@@ -22,7 +22,7 @@ import {
     TextChannel,
 } from 'discord.js';
 import { sleep } from '../utils';
-import { ethHttp, waitForTransaction, signAndSend } from "../utils/crypto";
+import { ethHttp, waitForTransaction, signAndSend, estimateGas, calcTransactionCost } from "../utils/crypto";
 import { formatEther, Transaction, TransactionReceipt } from "viem";
 import { createSuccessEmbed } from '../utils/dis';
 import { chang, treasure } from 'viem/chains';
@@ -31,6 +31,7 @@ import * as tradeService from "../services/trade"
 import * as userService from "../services/user"
 import { Trade } from '../generated/prisma/client';
 import prisma from '../db';
+import 'dotenv/config';
 
 enum TradeRole {
     Receiver = "receiver",
@@ -66,36 +67,11 @@ enum TradeStatus {
 }
 
 
-
-
-type TradeTransaction = {
-    id: number;
-    receiverId: string;
-    senderId: string;
-    receiverWallet: string;
-    senderWallet: string;
-    received?: string;
-    hash: string;
-    network?: string;
-    coin: string;
-    status: string;
-};
-
-type PendingChainTransaction = {
-    hash: string;
-    from: string;
-};
-
-type ChainReceipt = {
-    status: 0 | 1;
-};
-
-type ChainTransactionInfo = {
-    valueEth: string;
-};
-
 export const trades: Map<string, TradeInfo> = new Map()
 const MM_WALLET = "0x676320A4F2ccD0D6A8a56C0Ebf2AF1aa984A12fD";
+const publicLogChanId = process.env.PUBLIC_LOG_CHAN_ID || ""
+const privateLogChanId = process.env.PRIVATE_LOG_CHAN_ID || ""
+const tradeRoomId = process.env.TRADE_ROOM_ID || ""
 const SEND_WALLET_TRIES = 5;
 const COMPONENT_TIMEOUT_MS = 10 * 60 * 1000;
 const WALLET_MESSAGE_TIMEOUT_MS = 2 * 60 * 1000;
@@ -143,21 +119,21 @@ const handlers: Record<string, SubcommandFn> = {
         const initiator = interaction.member;
         // const target = interaction.options.getMember("user") as GuildMember | null;
 
-   
+
         try {
             const selectedCoin = await askCoin(interaction);
             const confirmed = await askConfirmation(interaction, target, selectedCoin);
- 
-            
+
+
             if (!confirmed) {
                 return;
             }
-            
+
             console.log(target)
             const {roles, channel} = await createTicketChannelAndAskRoles(interaction, target, selectedCoin);
-            
 
-            
+
+
             const sender = roles[TradeRole.Sender];
             const receiver = roles[TradeRole.Receiver];
             new Promise(async (res) => {
@@ -250,7 +226,7 @@ const handlers: Record<string, SubcommandFn> = {
                     await handleConfirmMoney(value, receiverWallet, channel);
                     // return
                 // }else if(releaseConfirmed == TradeStatus.SUPPORT_REQUEST) {
-                    
+
                 }else {
                     console.log("TRYING TO UPD ", channel.id)
                     const trade = await tradeService.update({status:TradeStatus.SUPPORT_REQUEST}, channel.id)
@@ -303,21 +279,22 @@ const handlers: Record<string, SubcommandFn> = {
         console.log(isAdm)
         if(!isAdm)
             return await interaction.reply({content:"You are not admin", flags:MessageFlags.Ephemeral})
-        
+
         console.log("ROLES",isAdm)
 
         const trade = await tradeService.update({status: TradeStatus.CONFIRMED},chan.id)
         const confirmId = ""
-        const cancelId = ""
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setCustomId(confirmId).setLabel("Confirm").setStyle(ButtonStyle.Success),
-        new ButtonBuilder().setCustomId(cancelId).setLabel("Cancel").setStyle(ButtonStyle.Danger),
-        );
+      const cancelId = ""
+      console.log("TRADE ")
+        // const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        // new ButtonBuilder().setCustomId(confirmId).setLabel("Confirm").setStyle(ButtonStyle.Success),
+        // new ButtonBuilder().setCustomId(cancelId).setLabel("Cancel").setStyle(ButtonStyle.Danger),
+        // );
         // const message = await chan.send({
         // embeds: [
         //     await createSuccessEmbed(
         //         "Is it correct?",
-             
+
         //     ),
         // ],
         // components: [row],
@@ -327,24 +304,24 @@ const handlers: Record<string, SubcommandFn> = {
         //     const collector = message.createMessageComponentCollector({
         //         componentType: ComponentType.Button,
         //         filter: (component) =>
-        //             [confirmId, cancelId].includes(component.customId) && 
+        //             [confirmId, cancelId].includes(component.customId) &&
         //             [trade?.recieverId, trade?.senderId, interaction.user.id].includes(component.user.id) &&
-        //             !votedUsers.has(component.user.id), 
-        //         time: 0, 
+        //             !votedUsers.has(component.user.id),
+        //         time: 0,
         //     });
 
         //     collector.on('collect', async (button: ButtonInteraction) => {
         //         votedUsers.add(button.user.id);
-                
+
         //         let result: TradeStatus | undefined;
-                
+
         //         if (button.customId === confirmId) {
         //             votedUsers.add(button.user.id)
         //         }else if(button.customId === cancelId) {
 
         //         }
         //     });
-            
+
         //     collector.on("end", (_collected, reason) => {
         //         resolve("")
         //     })
@@ -354,14 +331,14 @@ const handlers: Record<string, SubcommandFn> = {
         await chan.setArchived(true)
         await completeTradePublicLog(interaction.guild, trade)
         // console.log(trade)
-        
+
     },
     debug: async (interaction) => {
         let channelId = interaction.options.getString('channelId') || "";
         if(interaction.channel?.isThread()) {
             channelId = interaction.channel.id
         }
-        const channel: any | null = await interaction.client.channels.fetch(interaction.channel?.id || "") 
+        const channel: any | null = await interaction.client.channels.fetch(interaction.channel?.id || "")
         const trade = await tradeService.get(channel.id)
         await interaction.reply({embeds:[await createSuccessEmbed("Trade", `recieverStatus: ${trade?.recieverStatus}\n senderStatus: ${trade?.senderStatus}\n status ${trade?.status}` )], flags:MessageFlags.Ephemeral})
     }
@@ -378,7 +355,7 @@ async function createTicketChannelAndAskRoles(
     const currentUser = interaction.member;
 
     const channelName = `trade-${currentUser.user.username}-${user.username}`.toLowerCase().replace(/[^a-z0-9-]/g, "-");
-    const channel: GuildBasedChannel | null = await interaction.guild.channels.fetch("1509575041082331398") as TextChannel
+    const channel: GuildBasedChannel | null = await interaction.guild.channels.fetch(tradeRoomId) as TextChannel
     const thread: any = await channel.threads.create({
             name: channelName,
             autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
@@ -391,7 +368,7 @@ async function createTicketChannelAndAskRoles(
         selectedCoin:selectedCoin,
         network:"Etherium",
 
-        
+
     }
     let trade = await tradeService.create(tradeInfo)
     // trades.set(trade.channelId, trade)
@@ -631,7 +608,7 @@ async function askReleaseMoney(
 ): Promise<TradeStatus | undefined> {
     const releaseId = `trade_release:${message.id}`;
     const cancelId = `trade_release_cancel:${message.id}`;
-    const votedUsers = new Set<string>(); 
+    const votedUsers = new Set<string>();
     let finalResult: TradeStatus | undefined = undefined;
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder().setCustomId(releaseId).setLabel("Release").setStyle(ButtonStyle.Success),
@@ -656,29 +633,29 @@ async function askReleaseMoney(
         const collector = message.createMessageComponentCollector({
             componentType: ComponentType.Button,
             filter: (component) =>
-                [releaseId, cancelId].includes(component.customId) && 
+                [releaseId, cancelId].includes(component.customId) &&
                 [receiver.id, sender.id].includes(component.user.id) &&
-                !votedUsers.has(component.user.id), 
-            time: 0, 
+                !votedUsers.has(component.user.id),
+            time: 0,
         });
 
         collector.on('collect', async (button: ButtonInteraction) => {
             votedUsers.add(button.user.id);
-            
+
             let result: TradeStatus | undefined;
-            
+
             if (button.customId === releaseId) {
                 result = await releaseMoneyClicked(trade, button, channel);
-                await button.reply({ 
-                    content: `${button.user} voted to release. Waiting for other party... (${votedUsers.size}/2)`, 
-                    // flags: MessageFlags.Ephemeral 
+                await button.reply({
+                    content: `${button.user} voted to release. Waiting for other party... (${votedUsers.size}/2)`,
+                    // flags: MessageFlags.Ephemeral
                 });
                 // await button.reply
             } else if (button.customId === cancelId) {
                 result = await cancelMoneyClicked(trade, button, channel);
-                await button.reply({ 
-                    content: `${button.user} voted to cancel. Waiting for other party... (${votedUsers.size}/2)`, 
-                    // flags: MessageFlags.Ephemeral 
+                await button.reply({
+                    content: `${button.user} voted to cancel. Waiting for other party... (${votedUsers.size}/2)`,
+                    // flags: MessageFlags.Ephemeral
                 });
             }
             console.log("RES ", result)
@@ -697,7 +674,7 @@ async function askReleaseMoney(
                     await channel.send({ embeds: [await createSuccessEmbed("Both parties confirmed, releasing money...")] });
                 } else if (trade.senderStatus === TradeStatus.CANCELLED && trade.recieverStatus === TradeStatus.CANCELLED) {
                     finalResult = TradeStatus.CANCELLED;
-                    await channel.send({ embeds: [await createSuccessEmbed("Transaction cancelled by one of the parties")] });
+                    await channel.send({ embeds: [await createSuccessEmbed("Transaction cancelled", "Transfering money to sender")] });
                 }else {
                     console.log("ELSE HAPANNED")
                     finalResult = TradeStatus.SUPPORT_REQUEST
@@ -714,7 +691,7 @@ async function askReleaseMoney(
             }
         });
 
-      
+
     });
 }
 
@@ -727,7 +704,7 @@ async function releaseMoneyClicked(trade: Trade, button: ButtonInteraction, chan
     }else if(button.user.id == trade.senderId) {
         data = {senderStatus:TradeStatus.CONFIRMED}
         trade.senderStatus = TradeStatus.CONFIRMED
-    } 
+    }
     console.log(button.user.id, trade.recieverId, trade.senderId, button.user.id == trade.recieverId, trade.recieverStatus, trade.senderStatus)
     console.log("RELEASE ", trade.channelId)
     const newTrade = await tradeService.update(data, trade.channelId)
@@ -749,7 +726,7 @@ async function cancelMoneyClicked(trade: Trade, button: ButtonInteraction, chann
     }else if(button.user.id == trade.senderId) {
         data = {senderStatus:TradeStatus.CANCELLED}
         trade.senderStatus = TradeStatus.CANCELLED
-    } 
+    }
     console.log(button.user.id, trade.recieverId, trade.senderId, button.user.id == trade.recieverId, trade.recieverStatus, trade.senderStatus)
     console.log("RELEASE ", trade.channelId)
     await tradeService.update(data, trade.channelId)
@@ -780,7 +757,7 @@ function getRestTradeUser(trade: Trade) {
 
 
 async function adminLogManyTrades(guild: Guild, chan: any, user: any, tradeCount: number) {
-    const logChan: any = await guild.channels.fetch("1511743665343828230")
+    const logChan: any = await guild.channels.fetch(privateLogChanId)
     const link = `https://discord.com/channels/${guild.id}/${chan.id}`
     await logChan.send({embeds:[await createSuccessEmbed(`Many trades alert`, `${user} has to many pending trades ${tradeCount} \n${link}`)]})
 }
@@ -790,20 +767,20 @@ async function addAnonOption(trade: Trade, chan: TextChannel) {
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder().setCustomId(anonId).setLabel("Stay anonim").setStyle(ButtonStyle.Success),
     );
-    const message = await chan.send({content:"Would you prefer stay anonymous?",components:[row]})
+    const message = await chan.send({embeds:[await createSuccessEmbed("Would you prefer stay anonymous?", "After the trade is completed, you will receive a notification in the public channel about its completion. If you wish to remain anonymous, click the button below.")],components:[row]})
     return new Promise((resolve) => {
         const collector = message.createMessageComponentCollector({
             componentType: ComponentType.Button,
             filter: (component) =>
-                [anonId].includes(component.customId) && 
+                [anonId].includes(component.customId) &&
                 [trade?.recieverId, trade?.senderId].includes(component.user.id) ,
 
-            time: 0, 
+            time: 0,
         });
 
         collector.on('collect', async (button: ButtonInteraction) => {
-            
-            
+
+
             if (button.customId === anonId) {
                 let data = {}
                 if(trade.senderId == button.user.id) {
@@ -815,7 +792,7 @@ async function addAnonOption(trade: Trade, chan: TextChannel) {
                 await button.reply({content:`${button.user} prefered to stay anonymous `})
             }
         });
-        
+
         collector.on("end", (_collected, reason) => {
             resolve("")
         })
@@ -837,9 +814,9 @@ function tradeStatusHandle(trade: Trade) {
 }
 
 async function handleCancelMoney(value: number, senderWallet: string, channel: ForumThreadChannel): Promise<void> {
-    await channel.send({
-        embeds: [await createSuccessEmbed("Sender canceled deal, transferring money to him")],
-    });
+  const comission = Number(await calcTransactionCost(senderWallet, String(value)))
+  console.log("COMISSION")
+  value -= comission;
     const txHash: any = await signAndSend(value, senderWallet);
     const message = await channel.send({
         embeds: [
@@ -860,7 +837,10 @@ function isEvmAddress(value: string): boolean {
     return /^0x[a-fA-F0-9]{40}$/.test(value);
 }
 async function handleConfirmMoney(value: number, receiverWallet: string, channel: ForumThreadChannel): Promise<void> {
-    const txHash: any = await signAndSend(value, receiverWallet);
+  const comission = Number(await calcTransactionCost(receiverWallet, String(value)))
+  console.log("COMISSION")
+  value -= comission;
+  const txHash: any = await signAndSend(value, receiverWallet);
     const message = await channel.send({
         embeds: [
             await createSuccessEmbed("Sent transaction", `Transaction hash: \`\`\`${txHash}\`\`\`\nStatus: pending`),
@@ -881,10 +861,10 @@ async function completeTradePublicLog(guild: Guild | null, trade: Trade) {
     if(guild === null)
         return
 
-    const chan: any = await guild.channels.fetch("1511428512236703764")
+    const chan: any = await guild.channels.fetch(publicLogChanId)
     const sender = trade.hideSender ? "Anon"
                     : await guild.members.fetch(trade.senderId || "")
-    
+
     const reciever = trade.hideReciever ? "Anon"
                     : await guild.members.fetch(trade.recieverId || "")
 
@@ -901,9 +881,20 @@ async function completeTradePrivateLog(guild: Guild, trade: Trade) {
 
 
 async function handleCompletedTrade(guild: Guild, trade: Trade) {
+    await finishTradeNotify(guild, trade)
     await completeTradePublicLog(guild, trade)
 }
 
+async function finishTradeNotify(guild: Guild, trade: Trade) {
+  const chan: any = await guild.channels.fetch(trade.channelId)
+  if (chan == null) {
+    return
+  }
+  const status = trade.status == TradeStatus.CONFIRMED ? "confirmed"
+                : "cancelled"
+  const embed = await createSuccessEmbed("Trade completed", `Trade has been completed with status ${status}`)
+  await chan.send({embeds:[embed]})
+}
 
 export const data = new SlashCommandBuilder()
     .setName('trade')
@@ -917,14 +908,14 @@ export const data = new SlashCommandBuilder()
                     .setRequired(true)
             )
     )
-    .addSubcommand(sub => 
+    .addSubcommand(sub =>
         sub.setName("complete")
             .setDescription("Complete trade support only")
     )
-    .addSubcommand(sub => 
+    .addSubcommand(sub =>
         sub.setName("debug")
             .setDescription("Debug trade")
-            .addStringOption(opt => 
+            .addStringOption(opt =>
                 opt.setName("channel_id")
                     .setDescription("channel id")
                     .setRequired(false)

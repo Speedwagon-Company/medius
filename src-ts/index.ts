@@ -1,9 +1,9 @@
-import { Client, Collection, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
+import { Client, Collection, Events, GatewayIntentBits, REST, Routes, MessageFlags } from 'discord.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
 import 'dotenv/config';
-import { watchMMWalletTrans } from './utils/crypto';
+import { calcTransactionCost, estimateGas, watchMMWalletTrans } from './utils/crypto';
 import prisma from './db';
 const express = require("express")
 const app = express()
@@ -27,10 +27,10 @@ async function deployCommands(myClient: MyClient) {
     }
 
     const rest = new REST().setToken(process.env.DIS_BOT_TOKEN);
-    
+
     try {
         const commandsData = myClient.commands.map(cmd => cmd.data.toJSON());
-        
+
         console.log(`[DEPLOY] Начинаю обновление ${commandsData.length} команд...`);
 
         // Глобальное обновление (может занять время, для тестов на одном сервере используй applicationGuildCommands)
@@ -50,17 +50,9 @@ watchMMWalletTrans()
 
 async function init() {
 
-    new Promise(async (res) => {
-        const cfg = await prisma.config.findFirst()
-        console.log(cfg, !cfg)
-        if(cfg === null) {
-            await prisma.config.create({data:{embed_suc_color:"0xff1a18"}})
-            console.log("created")
-            return res
-        }
-    })
-    const commandsPath = path.join(process.cwd(), 'src-ts', 'commands'); 
-    
+
+    const commandsPath = path.join(process.cwd(), 'src-ts', 'commands');
+
     if (!fs.existsSync(commandsPath)) {
         console.error(`[ERROR] Папка с командами не найдена: ${commandsPath}`);
         return;
@@ -71,11 +63,11 @@ async function init() {
     for (const file of commandFiles) {
         const filePath = path.join(commandsPath, file);
         const fileUrl = pathToFileURL(filePath).href;
-        
+
         try {
             const command = await import(fileUrl);
-            const cmd = command.default || command; 
-            
+            const cmd = command.default || command;
+
             if (cmd.data && cmd.execute) {
                 client.commands.set(cmd.data.name, cmd);
                 console.log(`[INFO] Команда /${cmd.data.name} загружена.`);
@@ -86,12 +78,21 @@ async function init() {
     }
 
     await client.login(process.env.DIS_BOT_TOKEN);
+        new Promise(async (res) => {
+        const cfg = await prisma.config.findFirst()
+        console.log(cfg, !cfg)
+        if(cfg === null) {
+            await prisma.config.create({data:{embed_suc_color:"0xff1a18"}})
+            console.log("created")
+            return res
+        }
+    })
 
 }
 
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`✅ Ready! Logged in as ${readyClient.user.tag}`);
-    
+
     await deployCommands(client);
     console.log(`[SYSTEM] Бот полностью готов к работе.`);
 });
@@ -106,7 +107,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         await command.execute(interaction);
     } catch (error) {
         console.error(error);
-        const reply = { content: 'Произошла ошибка при выполнении команды!', ephemeral: true };
+        const reply = { content: 'Error Happenned', ephemeral:true };
         if (interaction.replied || interaction.deferred) await interaction.followUp(reply);
         else await interaction.reply(reply);
     }
@@ -129,6 +130,7 @@ app.get("/trades/:id", async (req: any, res: any) => {
     res.json(trade)
 })
 
-app.listen(3000, () => {
-    console.log("express is running")
+app.listen(3000, async () => {
+  console.log("express is running")
+  console.log(await calcTransactionCost("0x377BcD30C0fa6C86136eD0772Dc251A265C1C6DF", "0.0649"))
 })

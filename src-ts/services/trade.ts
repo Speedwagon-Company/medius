@@ -2,7 +2,7 @@ import prisma from "../db";
 
 
 export async function create(tradeData: any) {
-    return await prisma.trade.create({data:tradeData}) 
+  return await prisma.trade.create({ data: tradeData })
 }
 
 export async function update(tradeData: any, channelId: string) {

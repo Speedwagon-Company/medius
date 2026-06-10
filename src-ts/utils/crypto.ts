@@ -1,13 +1,13 @@
 import { createPublicClient, webSocket, Hex, PublicClient, http, HttpTransport, RpcSchema, createWalletClient, Transaction } from 'viem';
 import { mainnet, sepolia } from 'viem/chains';
-import { HttpRpcClient, parseEther } from 'viem/utils';
+import { formatEther, formatGwei, HttpRpcClient, parseEther } from 'viem/utils';
 import { sleep } from './index';
 import { privateKeyToAccount } from 'viem/accounts';
 // transport:http(process.env.RPC_URL),
 export const ethHttp = createPublicClient({
     chain: sepolia,
     transport: http(process.env.RPC_URL, {
-        timeout: 60000, 
+        timeout: 60000,
         retryCount: 3,
         retryDelay: 1000,
     }),
@@ -26,7 +26,7 @@ export function watchMMWalletTrans() {
   const client = ethHttp
   const unwatch = client.watchBlocks({
   onBlock: async (block) => {
-    console.log(`Новый блок: ${block.number}`)
+    // console.log(`Новый блок: ${block.number}`)
 
     const blockWithTxs = await client.getBlock({
       blockNumber: block.number,
@@ -34,8 +34,8 @@ export function watchMMWalletTrans() {
     })
 
     const myTxs: any = blockWithTxs.transactions.filter(
-      (tx) => 
-        tx.from?.toLowerCase() === MM_ADDRESS.toLowerCase() || 
+      (tx) =>
+        tx.from?.toLowerCase() === MM_ADDRESS.toLowerCase() ||
         tx.to?.toLowerCase() === MM_ADDRESS.toLowerCase()
     )
 
@@ -47,13 +47,13 @@ export function watchMMWalletTrans() {
       console.log("set trans: ", transactions, tx.from)
     })
   },
-  pollingInterval: 10_000, 
+  pollingInterval: 10_000,
 })
 }
 
 export async function waitForTransaction(wallet: string): Promise<Transaction> {
   while(true) {
-    const trans = transactions.get(wallet.toLowerCase()) 
+    const trans = transactions.get(wallet.toLowerCase())
     if(trans){
       transactions.delete(wallet.toLowerCase())
       return trans
@@ -64,18 +64,58 @@ export async function waitForTransaction(wallet: string): Promise<Transaction> {
 
 export async function signAndSend(amount: number, to: string) {
   console.log('start sign', amount, to, typeof to)
-  
+
   console.log('ACC', mmAcc.address)
-  
+
   const hash = await mmAccClient.sendTransaction({
     to: to as `0x${string}`,
     value: parseEther(amount.toString()),
   })
-  
+
   console.log('SENDING', hash)
-  
+
   // const receipt = await client.waitForTransactionReceipt({ hash })
   // console.log('Confirmed in block:', receipt.blockNumber)
-  
+
   return hash
+}
+
+export async function estimateGas(to: string, valueWei: string): Promise<bigint> {
+  try {
+    const gasLimit = await ethHttp.estimateGas({
+      account: mmAcc,
+      to: to as `0x${string}`,
+      value: parseEther(valueWei)
+    });
+
+    return gasLimit;
+  } catch (e) {
+    console.log(e)
+    return 21000n;
+  }
+}
+
+export async function calcTransactionCost(to: string, valueEth: string) {
+  let gasLimit = null
+
+  try {
+  gasLimit = await ethHttp.estimateGas({
+    account: mmAcc,
+    to: to as `0x${string}`,
+    value: parseEther(valueEth)
+  });
+
+  } catch (e) {
+    gasLimit = 21000n
+  }
+
+  const gasPrice = await ethHttp.getGasPrice();
+
+  const gasCostInWei = gasLimit * gasPrice;
+
+
+  const gasCostInEth = formatEther(gasCostInWei);
+
+  return gasCostInEth
+
 }
