@@ -24,14 +24,19 @@ import {
 import { sleep } from '../utils';
 import { ethHttp, waitForTransaction, signAndSend, estimateGas, calcTransactionCost } from "../utils/crypto";
 import { formatEther, Transaction, TransactionReceipt } from "viem";
-import { createSuccessEmbed } from '../utils/dis';
+import { createSuccessEmbed, isAdmin } from '../utils/dis';
 import { chang, treasure } from 'viem/chains';
 import { channel } from 'diagnostics_channel';
 import * as tradeService from "../services/trade"
 import * as userService from "../services/user"
-import { Trade } from '../generated/prisma/client';
+import * as inviteService from "../services/invite"
+import * as cfgService from "../services/config"
+import { Invite, Trade } from '../generated/prisma/client';
 import prisma from '../db';
 import 'dotenv/config';
+import { InviteTradeBtnRes, tradeEventEmitter } from '../btnHandlers/invite';
+import { configCache } from '../storage';
+import { Config } from '../generated/prisma/browser';
 
 enum TradeRole {
     Receiver = "receiver",
@@ -123,7 +128,6 @@ const handlers: Record<string, SubcommandFn> = {
         const initiator = interaction.member;
         // const target = interaction.options.getMember("user") as GuildMember | null;
 
-
         try {
             const selectedCoin = await askCoin(interaction);
             const confirmed = await askConfirmation(interaction, target, selectedCoin);
@@ -132,8 +136,43 @@ const handlers: Record<string, SubcommandFn> = {
             if (!confirmed) {
                 return;
             }
+           // const [canInvite] = Promise.all([
 
-            console.log(target)
+            // ])
+
+          const status = await inviteService.canInvite(initiator.id, target.id)
+          console.log("STATUS", status)
+            if (status == "many invites") {
+              return await interaction.followUp({ content: "This user already have pending invite from you", flags: MessageFlags.Ephemeral})
+            } else if (status === "trade"){
+              return await interaction.followUp({ content: "You already have pending trade", flags: MessageFlags.Ephemeral})
+            }
+            // const invite: Invite = await inviteService.create({targetId:target.id, senderId:interaction.user.id})
+            // let row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            //   new ButtonBuilder()
+            //     .setCustomId(`trade_invite_${invite.id}_accept`)
+            //     .setStyle(ButtonStyle.Success)
+            //     .setLabel('Accept'),
+            //   new ButtonBuilder()
+            //     .setCustomId(`trade_invite_${invite.id}_declince`)
+            //     .setStyle(ButtonStyle.Danger)
+            //     .setLabel("Deny")
+            // )
+            // const sentMessage = await target.send({
+            //     embeds:[await createSuccessEmbed("New trade request",`From ${interaction.user}`)],
+            //     components: [row]
+            //   });
+
+
+            // console.log("STARTED WAITING")
+            // const res: InviteTradeBtnRes = await tradeEventEmitter.waitForResponse(String(invite.id))
+            // row.components.forEach((comp) => comp.setDisabled(true))
+            // await sentMessage.edit({ components: [row] });
+            // console.log("ENDED WAITING")
+            // if (!res.accepted) {
+            //   return await interaction.user.send({content:`${target} declined your trade`})
+            // }
+            // console.log(target)
             const {roles, channel} = await createTicketChannelAndAskRoles(interaction, target, selectedCoin);
 
 
@@ -143,7 +182,7 @@ const handlers: Record<string, SubcommandFn> = {
             new Promise(async (res) => {
                 const senderTrades = await prisma.trade.count({where:{senderId:sender.id, status:{not:"CONFIRMED"}}})
                 const recieverTrades = await prisma.trade.count({where:{recieverId:receiver.id, status:{not:"CONFIRMED"}}})
-                console.log("TRADES ", senderTrades, recieverTrades)
+                // console.log("TRADES ", senderTrades, recieverTrades)
                 if(senderTrades >= 3) {
                     await adminLogManyTrades(guild, channel, sender, senderTrades)
                 }
@@ -169,7 +208,9 @@ const handlers: Record<string, SubcommandFn> = {
                     ),
                 ],
             });
-            const senderWallet = await getWalletInTries(channel, sender, SEND_WALLET_TRIES);
+
+            const blackList = new Set<String>()
+            const senderWallet = await getWalletInTries(channel, sender, SEND_WALLET_TRIES, blackList);
             // const senderWallet = "0x377BcD30C0fa6C86136eD0772Dc251A265C1C6DF"
             await channel.send({
                 content: receiver.toString(),
@@ -180,14 +221,16 @@ const handlers: Record<string, SubcommandFn> = {
                     ),
                 ],
             });
-            const receiverWallet = await getWalletInTries(channel, receiver, SEND_WALLET_TRIES);
+            const receiverWallet = await getWalletInTries(channel, receiver, SEND_WALLET_TRIES, blackList);
             // const receiverWallet = "0x6a71883650146FED52190B72dd7fAC063a8a541A"
+            await tradeService.update({senderWallet:senderWallet,recieverWallet:receiverWallet}, channel.id)
+            const cfg = await cfgService.get(interaction.guildId || "")
             await channel.send({
                 content: sender.toString(),
                 embeds: [
                     await createSuccessEmbed(
                         "Valid wallet",
-                        `Now waiting for sender (${sender.displayName}) to send money to mm\nwallet: \`\`\`${MM_WALLET}\`\`\``,
+                        `Now waiting for sender (${sender.displayName}) to send money to mm\nwallet: \`\`\`${cfg.mmWallet}\`\`\``,
                     ),
                 ],
             });
@@ -273,13 +316,13 @@ const handlers: Record<string, SubcommandFn> = {
     },
     complete: async (interaction) => {
         let chan = interaction.channel as ThreadChannel
-        if(!chan.isThread) {
+        if(chan.name.split("-")[0] !== "trade") {
             return await interaction.reply({content:"You are not in trade room", flags:MessageFlags.Ephemeral})
         }
         // @ts-ignore
         console.log(interaction.member.roles.cache.map(role => role.name))
         // @ts-ignore
-        const isAdm = interaction.member?.roles.cache.has("1485383709568925878")
+        const isAdm = isAdmin(interaction.member.id)
         console.log(isAdm)
         if(!isAdm)
             return await interaction.reply({content:"You are not admin", flags:MessageFlags.Ephemeral})
@@ -367,10 +410,11 @@ async function createTicketChannelAndAskRoles(
             type: ChannelType.PrivateThread
     })
 
-    const tradeInfo: TradeInfo = {
+    const tradeInfo: any = {
         channelId:thread.id,
         selectedCoin:selectedCoin,
-        network:"Etherium",
+      network: "Etherium",
+        membersId: `${currentUser.id}, ${user.id}`
 
 
     }
@@ -569,7 +613,7 @@ async function buildRolesEmbed(selectedCoin: string, roles: RoleSelection): Prom
     );
 }
 
-async function getWalletInTries(channel: ForumThreadChannel, member: any, tries: number): Promise<string> {
+async function getWalletInTries(channel: ForumThreadChannel, member: any, tries: number, blackList: Set<String>): Promise<string> {
     console.log("")
     for (let attempt = 0; attempt < tries; attempt += 1) {
         const collected = await channel.awaitMessages({
@@ -588,8 +632,9 @@ async function getWalletInTries(channel: ForumThreadChannel, member: any, tries:
         }
 
         const wallet = message.content.trim();
-        if (isEvmAddress(wallet)) {
-            return wallet;
+        if (isEvmAddress(wallet) && !blackList.has(wallet)) {
+            blackList.add(wallet)
+            return wallet.toLowerCase();
         }
 
         await message.reply(`This is not correct wallet\nLeft tries ${tries - attempt - 1}`);
@@ -711,7 +756,7 @@ async function releaseMoneyClicked(trade: Trade, button: ButtonInteraction, chan
     }
     console.log(button.user.id, trade.recieverId, trade.senderId, button.user.id == trade.recieverId, trade.recieverStatus, trade.senderStatus)
     console.log("RELEASE ", trade.channelId)
-    const newTrade = await tradeService.update(data, trade.channelId)
+    const newTrade = await tradeService.update(data, trade.channelId || "")
 
     let msgForRest = getRestTradeUser(trade)
     console.log(msgForRest)
@@ -733,7 +778,7 @@ async function cancelMoneyClicked(trade: Trade, button: ButtonInteraction, chann
     }
     console.log(button.user.id, trade.recieverId, trade.senderId, button.user.id == trade.recieverId, trade.recieverStatus, trade.senderStatus)
     console.log("RELEASE ", trade.channelId)
-    await tradeService.update(data, trade.channelId)
+    await tradeService.update(data, trade.channelId ||"")
     // trades.set(trade.channelId, trade)
     // console.log(trades.get(trade.channelId)?.senderStatus, trades.get(trade.channelId)?.recieverStatus)
     // await channel.send({embeds:[await createSuccessEmbed(`${button.user.username} pressed cancel`)]})
@@ -761,7 +806,9 @@ function getRestTradeUser(trade: Trade) {
 
 
 async function adminLogManyTrades(guild: Guild, chan: any, user: any, tradeCount: number) {
-    const logChan: any = await guild.channels.fetch(privateLogChanId)
+  const cfg = await cfgService.get(guild.id)
+  console.log("cache config", cfg)
+    const logChan: any = await guild.channels.fetch(cfg.privateLogChanId || "")
     const link = `https://discord.com/channels/${guild.id}/${chan.id}`
     await logChan.send({embeds:[await createSuccessEmbed(`Many trades alert`, `${user} has to many pending trades ${tradeCount} \n${link}`)]})
 }
@@ -792,7 +839,7 @@ async function addAnonOption(trade: Trade, chan: TextChannel) {
                 }else if(trade.recieverId == button.user.id) {
                     data = {hideReciever: true}
                 }
-                await tradeService.update(data, trade.channelId)
+                await tradeService.update(data, trade.channelId || "")
                 await button.reply({content:`${button.user} prefered to stay anonymous `})
             }
         });
@@ -864,8 +911,8 @@ async function handleConfirmMoney(value: number, receiverWallet: string, channel
 async function completeTradePublicLog(guild: Guild | null, trade: Trade) {
     if(guild === null)
         return
-
-    const chan: any = await guild.channels.fetch(publicLogChanId)
+    const cfg: Config = await cfgService.get(guild.id)
+    const chan: any = await guild.channels.fetch(cfg.publicLogChanId || "")
     const sender = trade.hideSender ? "Anon"
                     : await guild.members.fetch(trade.senderId || "")
 
@@ -890,7 +937,7 @@ async function handleCompletedTrade(guild: Guild, trade: Trade) {
 }
 
 async function finishTradeNotify(guild: Guild, trade: Trade) {
-  const chan: any = await guild.channels.fetch(trade.channelId)
+  const chan: any = await guild.channels.fetch(trade.channelId || "")
   if (chan == null) {
     return
   }

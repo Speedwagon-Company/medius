@@ -3,8 +3,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
 import 'dotenv/config';
-import { calcTransactionCost, estimateGas, watchMMWalletTrans } from './utils/crypto';
+import { calcTransactionCost, estimateGas, initCrypto, watchMMWalletTrans } from './utils/crypto';
 import prisma from './db';
+import { handleTradeInvite } from './btnHandlers/invite';
+import { setup } from './msgHandlers/setup';
+import { configCache } from './storage';
+import * as cfgService from "./services/config"
+import { Config } from './generated/prisma/browser';
 const express = require("express")
 const app = express()
 
@@ -46,11 +51,11 @@ async function deployCommands(myClient: MyClient) {
 }
 
 watchMMWalletTrans()
-
+console.log("NET ", process.env.mainnet === "false")
 
 async function init() {
 
-
+    // console.log("CRYPTO " net)
     const commandsPath = path.join(process.cwd(), 'src-ts', 'commands');
 
     if (!fs.existsSync(commandsPath)) {
@@ -79,16 +84,32 @@ async function init() {
 
     await client.login(process.env.DIS_BOT_TOKEN);
         new Promise(async (res) => {
-        const cfg = await prisma.config.findFirst()
-        console.log(cfg, !cfg)
-        if(cfg === null) {
-            await prisma.config.create({data:{embed_suc_color:"0xff1a18"}})
-            console.log("created")
-            return res
-        }
+        // const cfg = await prisma.config.findFirst()
+        // console.log(cfg, !cfg)
+        // if(cfg === null) {
+        //     await prisma.config.create({data:{embed_suc_color:"0xff1a18"}})
+        //     console.log("created")
+        //     return res
+        // }
     })
 
 }
+
+let initedCrypto = false
+client.on("interactionCreate", async (interaction: any) => {
+  if (!initedCrypto) {
+    await initCrypto(interaction.guildId)
+    initedCrypto = true
+  }
+  handleTradeInvite(interaction)
+  console.log("Pressed", interaction.user.username)
+})
+
+client.on("messageCreate", async (msg) => {
+  if (msg.author.bot || !msg.content?.startsWith("-"))
+    return
+  await setup(msg)
+})
 
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`✅ Ready! Logged in as ${readyClient.user.tag}`);
@@ -97,14 +118,33 @@ client.once(Events.ClientReady, async (readyClient) => {
     console.log(`[SYSTEM] Бот полностью готов к работе.`);
 });
 
+function checkCfg(cfg: Config) {
+  const res = []
+  if (cfg.mmWallet === null)
+    res.push("mmWallet")
+  if (cfg.publicLogChanId === null)
+    res.push("publocLogChanId")
+  if (cfg.privateLogChanId === null)
+    res.push("privateLogChanId")
+  return res
+}
+
 client.on(Events.InteractionCreate, async (interaction) => {
+    if (!initedCrypto) {
+      await initCrypto(interaction.guildId || "")
+      initedCrypto = true
+    }
     if (!interaction.isChatInputCommand()) return;
 
     const command = client.commands.get(interaction.commandName);
     if (!command) return;
 
-    try {
-        await command.execute(interaction);
+  try {
+    const cfg = await cfgService.get(interaction.guildId || "")
+    const res = checkCfg(cfg)
+      if (res.length > 0)
+          return await interaction.reply({content:"Error: Config is not set " +res.join(" "), flags:MessageFlags.Ephemeral})
+      await command.execute(interaction);
     } catch (error) {
         console.error(error);
         const reply = { content: 'Error Happenned', ephemeral:true };
@@ -116,6 +156,11 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('КРИТИЧЕСКАЯ ОШИБКА (Unhandled Rejection):');
     console.error(reason);
 
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('❌ КРИТИЧЕСКАЯ ОШИБКА (Uncaught Exception):');
+    console.error(error);
 });
 
 init();

@@ -18,7 +18,9 @@ model User {
   username String
 
   sentTrades   Trade[] @relation("sender")
+  sentInvites Invite[] @relation("inviteSender")
   receivedTrades Trade[] @relation("reciever")
+  invites Invite[] @relation("target")
 }
 
 enum TradeStatus {
@@ -28,14 +30,37 @@ enum TradeStatus {
   SUPPORT_REQUEST
 }
 
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model Invite {
+  id Int @id @default(autoincrement())
+
+  status InviteStatus @default(PENDING)
+  target User @relation(name: "target", fields: [targetId], references: [discordId])
+  targetId String
+
+  sender User? @relation(name: "inviteSender", fields: [senderId], references: [discordId])
+  senderId String?
+
+  createdAt DateTime @default(now())
+  }
+
+
 model Trade {
   id     Int    @id @default(autoincrement())
-  channelId String @unique
+  channelId String? @unique
 
   sender User? @relation(name: "sender", fields: [senderId], references: [discordId])
   reciever User? @relation(name: "reciever", fields: [recieverId], references: [discordId])
   recieverStatus TradeStatus @default(WAITING)
   senderStatus TradeStatus @default(WAITING)
+
+  senderWallet String?
+  recieverWallet String?
 
   status String  @default("WAITING")
   selectedCoin String
@@ -43,7 +68,7 @@ model Trade {
   calledSupport Boolean @default(false)
 
   received String?
-  
+
   hideSender Boolean @default(false)
   hideReciever Boolean @default(false)
 
@@ -51,6 +76,8 @@ model Trade {
   recieverId String?
 
   createdAt DateTime @default(now())
+
+  membersId String?
 
 }
 
@@ -60,6 +87,8 @@ model Config {
 
   publicLogChanId String?
   privateLogChanId String?
+  adminRolesId String?
+  mmWallet String?
 
   embed_suc_color String
 }

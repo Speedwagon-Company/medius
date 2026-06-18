@@ -11,11 +11,11 @@ const SUP_REQ_CHAN_ID = "1505282213577490553"
 
 const handlers: Record<string, SubcommandFn> = {
     support: async (interaction) => {
-        const channel: any | null = await interaction.client.channels.fetch(interaction.channel?.id || "") 
+        const channel: any | null = await interaction.client.channels.fetch(interaction.channel?.id || "")
         if(!channel.name) {
             return
         }
-        
+
         if(channel.name.split("-")[0] !== "trade") {
             return await interaction.reply({content:"You are not in trade room", flags:MessageFlags.Ephemeral})
         }
@@ -34,7 +34,7 @@ const handlers: Record<string, SubcommandFn> = {
             reason = "Not given"
         }
         const id = randomUUID()
-        const supportReqChan: any = await interaction.client.channels.fetch(SUP_REQ_CHAN_ID) 
+        const supportReqChan: any = await interaction.client.channels.fetch(SUP_REQ_CHAN_ID)
         const row =  buildReqSupportBtn(id)
         const embed = await createSuccessEmbed(`Support request`, `User ${interaction.user.username} requested support \nReason: ${reason}`)
         const message: Message = await supportReqChan.send({ embeds:[embed],components:[row]})
@@ -43,19 +43,19 @@ const handlers: Record<string, SubcommandFn> = {
         return new Promise((res,rej) => {
             const collector = message.createMessageComponentCollector({
                 componentType: ComponentType.Button,
-                time: 0, 
+                time: 0,
             });
-            
-            collector.on("collect", async (button: ButtonInteraction) => { 
+
+            collector.on("collect", async (button: ButtonInteraction) => {
                 if(button.customId === id) {
                     const userId = button.user.id || ""
                     if(userId === ""){
                         return await button.reply({content:"Error happend", flags:MessageFlags.Ephemeral})
                     }
-                    invited.add(userId)
                     if(invited.has(userId)){
                         return await button.reply({content:"You already in this channel",flags:MessageFlags.Ephemeral}, )
                     }
+                    invited.add(userId)
                     // row.components.forEach((v: ButtonBuilder) => v.setDisabled(true))
                     await channel.members.add(interaction.user)
                     message.edit({embeds:[embed]})
@@ -89,7 +89,7 @@ export const data = new SlashCommandBuilder()
                 opt.setName('reason')
                     .setDescription('write a reason')
                     .setRequired(false)
-                    
+
             )
     );
 

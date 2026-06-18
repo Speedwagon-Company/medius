@@ -3,16 +3,27 @@ import { mainnet, sepolia } from 'viem/chains';
 import { formatEther, formatGwei, HttpRpcClient, parseEther } from 'viem/utils';
 import { sleep } from './index';
 import { privateKeyToAccount } from 'viem/accounts';
+import * as cfgService from "../services/config"
+import { exit } from 'node:process';
+import * as tradeService from "../services/trade"
+import prisma from '../db';
+import { TradeStatus } from '../generated/prisma/enums';
 // transport:http(process.env.RPC_URL),
+//
+
+const rpcUrl = process.env.mainnet === "true" ? process.env.MAINNET_RPC : process.env.RPC_URL
+const wsUrl = process.env.mainnet === "true" ? process.env.MAINNET_WS : process.env.CHAINSTACK_WS
+const net  =process.env.mainnet === "true" ? mainnet : sepolia
+
 export const ethHttp = createPublicClient({
-    chain: sepolia,
-    transport: http(process.env.RPC_URL, {
+    chain: net,
+    transport: http(rpcUrl, {
         timeout: 60000,
         retryCount: 3,
         retryDelay: 1000,
     }),
 });
-const MM_ADDRESS = process.env.OWNER_WALLET || ""
+let MM_ADDRESS =  process.env.OWNER_WALLET || ""
 const mmAcc = privateKeyToAccount(`0x${process.env.PRIVATE_WALLET_KEY}`)
 const mmAccClient = createWalletClient({
     account:mmAcc,
@@ -21,13 +32,22 @@ const mmAccClient = createWalletClient({
   })
 const transactions: Map<string, any> = new Map()
 
+export async function initCrypto(id: string) {
+  const cfg = await cfgService.get(id)
+  console.log("CFG", cfg)
+  if (cfg === null)
+    exit(1)
+  console.log("CRYPTO ", cfg.mmWallet, net)
+  if (cfg.guildId === "")
+    throw Error("Crypto mm")
+  // MM_ADDRESS = cfg.guildId || ""
+}
 
 export function watchMMWalletTrans() {
   const client = ethHttp
   const unwatch = client.watchBlocks({
   onBlock: async (block) => {
-    // console.log(`Новый блок: ${block.number}`)
-
+    console.log(`Новый блок: ${block.number} ${MM_ADDRESS}`)
     const blockWithTxs = await client.getBlock({
       blockNumber: block.number,
       includeTransactions: true
@@ -42,9 +62,15 @@ export function watchMMWalletTrans() {
     // if (myTxs.length > 0) {
     //   console.log('Найдены новые транзакции:', myTxs)
     // }
-    myTxs.forEach((tx: any) => {
-      transactions.set(tx.from, tx)
-      console.log("set trans: ", transactions, tx.from)
+      myTxs.forEach(async (tx: any) => {
+        console.log("FINDING ", tx.from)
+        const trade =await prisma.trade.findFirst({where:{senderWallet:tx.from.toLowerCase(), status:TradeStatus.WAITING}})
+        console.log("TRYING TO SET TRANS", trade?.id)
+        if (trade !== null) {
+          transactions.set(tx.from, tx)
+          console.log("set trans: ", transactions, tx.from)
+
+        }
     })
   },
   pollingInterval: 10_000,

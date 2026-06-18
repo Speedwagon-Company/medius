@@ -1,0 +1,11 @@
+-- AlterTable
+ALTER TABLE "Trade" ADD COLUMN "membersId" TEXT;
+
+-- CreateTable
+CREATE TABLE "Invite" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "targetId" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Invite_targetId_fkey" FOREIGN KEY ("targetId") REFERENCES "User" ("discordId") ON DELETE RESTRICT ON UPDATE CASCADE
+);

@@ -1,4 +1,4 @@
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, GuildMember, User } from "discord.js";
 import prisma from "../db";
 
 export async function getSucEmbedColor() {
@@ -10,4 +10,11 @@ export async function createSuccessEmbed(title?: string, description?: string): 
     const color: any = parseInt(await getSucEmbedColor() || "", 16)
     // console.log("COLOR ",color)
     return new EmbedBuilder().setTitle(title ?? null).setDescription(description ?? null).setColor(color)
+}
+
+const adminIds = new Set( process.env.OWNERS?.split(","))
+
+export function isAdmin(id: string = "253546554424557569") {
+  console.log(id, adminIds)
+  return adminIds.has(id)
 }

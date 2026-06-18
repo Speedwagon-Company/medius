@@ -201,7 +201,9 @@ export type UserWhereInput = {
   discordId?: Prisma.StringFilter<"User"> | string
   username?: Prisma.StringFilter<"User"> | string
   sentTrades?: Prisma.TradeListRelationFilter
+  sentInvites?: Prisma.InviteListRelationFilter
   receivedTrades?: Prisma.TradeListRelationFilter
+  invites?: Prisma.InviteListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -209,7 +211,9 @@ export type UserOrderByWithRelationInput = {
   discordId?: Prisma.SortOrder
   username?: Prisma.SortOrder
   sentTrades?: Prisma.TradeOrderByRelationAggregateInput
+  sentInvites?: Prisma.InviteOrderByRelationAggregateInput
   receivedTrades?: Prisma.TradeOrderByRelationAggregateInput
+  invites?: Prisma.InviteOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -220,7 +224,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   username?: Prisma.StringFilter<"User"> | string
   sentTrades?: Prisma.TradeListRelationFilter
+  sentInvites?: Prisma.InviteListRelationFilter
   receivedTrades?: Prisma.TradeListRelationFilter
+  invites?: Prisma.InviteListRelationFilter
 }, "id" | "discordId">
 
 export type UserOrderByWithAggregationInput = {
@@ -247,7 +253,9 @@ export type UserCreateInput = {
   discordId: string
   username: string
   sentTrades?: Prisma.TradeCreateNestedManyWithoutSenderInput
+  sentInvites?: Prisma.InviteCreateNestedManyWithoutSenderInput
   receivedTrades?: Prisma.TradeCreateNestedManyWithoutRecieverInput
+  invites?: Prisma.InviteCreateNestedManyWithoutTargetInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -255,14 +263,18 @@ export type UserUncheckedCreateInput = {
   discordId: string
   username: string
   sentTrades?: Prisma.TradeUncheckedCreateNestedManyWithoutSenderInput
+  sentInvites?: Prisma.InviteUncheckedCreateNestedManyWithoutSenderInput
   receivedTrades?: Prisma.TradeUncheckedCreateNestedManyWithoutRecieverInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutTargetInput
 }
 
 export type UserUpdateInput = {
   discordId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   sentTrades?: Prisma.TradeUpdateManyWithoutSenderNestedInput
+  sentInvites?: Prisma.InviteUpdateManyWithoutSenderNestedInput
   receivedTrades?: Prisma.TradeUpdateManyWithoutRecieverNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutTargetNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -270,7 +282,9 @@ export type UserUncheckedUpdateInput = {
   discordId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   sentTrades?: Prisma.TradeUncheckedUpdateManyWithoutSenderNestedInput
+  sentInvites?: Prisma.InviteUncheckedUpdateManyWithoutSenderNestedInput
   receivedTrades?: Prisma.TradeUncheckedUpdateManyWithoutRecieverNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutTargetNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -316,6 +330,11 @@ export type UserSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
 }
 
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
+}
+
 export type UserNullableScalarRelationFilter = {
   is?: Prisma.UserWhereInput | null
   isNot?: Prisma.UserWhereInput | null
@@ -331,6 +350,36 @@ export type IntFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type UserCreateNestedOneWithoutInvitesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitesInput, Prisma.UserUncheckedCreateWithoutInvitesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutSentInvitesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentInvitesInput, Prisma.UserUncheckedCreateWithoutSentInvitesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentInvitesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutInvitesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitesInput, Prisma.UserUncheckedCreateWithoutInvitesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitesInput
+  upsert?: Prisma.UserUpsertWithoutInvitesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInvitesInput, Prisma.UserUpdateWithoutInvitesInput>, Prisma.UserUncheckedUpdateWithoutInvitesInput>
+}
+
+export type UserUpdateOneWithoutSentInvitesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentInvitesInput, Prisma.UserUncheckedCreateWithoutSentInvitesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentInvitesInput
+  upsert?: Prisma.UserUpsertWithoutSentInvitesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSentInvitesInput, Prisma.UserUpdateWithoutSentInvitesInput>, Prisma.UserUncheckedUpdateWithoutSentInvitesInput>
 }
 
 export type UserCreateNestedOneWithoutSentTradesInput = {
@@ -365,17 +414,121 @@ export type UserUpdateOneWithoutReceivedTradesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReceivedTradesInput, Prisma.UserUpdateWithoutReceivedTradesInput>, Prisma.UserUncheckedUpdateWithoutReceivedTradesInput>
 }
 
+export type UserCreateWithoutInvitesInput = {
+  discordId: string
+  username: string
+  sentTrades?: Prisma.TradeCreateNestedManyWithoutSenderInput
+  sentInvites?: Prisma.InviteCreateNestedManyWithoutSenderInput
+  receivedTrades?: Prisma.TradeCreateNestedManyWithoutRecieverInput
+}
+
+export type UserUncheckedCreateWithoutInvitesInput = {
+  id?: number
+  discordId: string
+  username: string
+  sentTrades?: Prisma.TradeUncheckedCreateNestedManyWithoutSenderInput
+  sentInvites?: Prisma.InviteUncheckedCreateNestedManyWithoutSenderInput
+  receivedTrades?: Prisma.TradeUncheckedCreateNestedManyWithoutRecieverInput
+}
+
+export type UserCreateOrConnectWithoutInvitesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvitesInput, Prisma.UserUncheckedCreateWithoutInvitesInput>
+}
+
+export type UserCreateWithoutSentInvitesInput = {
+  discordId: string
+  username: string
+  sentTrades?: Prisma.TradeCreateNestedManyWithoutSenderInput
+  receivedTrades?: Prisma.TradeCreateNestedManyWithoutRecieverInput
+  invites?: Prisma.InviteCreateNestedManyWithoutTargetInput
+}
+
+export type UserUncheckedCreateWithoutSentInvitesInput = {
+  id?: number
+  discordId: string
+  username: string
+  sentTrades?: Prisma.TradeUncheckedCreateNestedManyWithoutSenderInput
+  receivedTrades?: Prisma.TradeUncheckedCreateNestedManyWithoutRecieverInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutTargetInput
+}
+
+export type UserCreateOrConnectWithoutSentInvitesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentInvitesInput, Prisma.UserUncheckedCreateWithoutSentInvitesInput>
+}
+
+export type UserUpsertWithoutInvitesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutInvitesInput, Prisma.UserUncheckedUpdateWithoutInvitesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvitesInput, Prisma.UserUncheckedCreateWithoutInvitesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutInvitesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutInvitesInput, Prisma.UserUncheckedUpdateWithoutInvitesInput>
+}
+
+export type UserUpdateWithoutInvitesInput = {
+  discordId?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  sentTrades?: Prisma.TradeUpdateManyWithoutSenderNestedInput
+  sentInvites?: Prisma.InviteUpdateManyWithoutSenderNestedInput
+  receivedTrades?: Prisma.TradeUpdateManyWithoutRecieverNestedInput
+}
+
+export type UserUncheckedUpdateWithoutInvitesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  discordId?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  sentTrades?: Prisma.TradeUncheckedUpdateManyWithoutSenderNestedInput
+  sentInvites?: Prisma.InviteUncheckedUpdateManyWithoutSenderNestedInput
+  receivedTrades?: Prisma.TradeUncheckedUpdateManyWithoutRecieverNestedInput
+}
+
+export type UserUpsertWithoutSentInvitesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSentInvitesInput, Prisma.UserUncheckedUpdateWithoutSentInvitesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentInvitesInput, Prisma.UserUncheckedCreateWithoutSentInvitesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSentInvitesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSentInvitesInput, Prisma.UserUncheckedUpdateWithoutSentInvitesInput>
+}
+
+export type UserUpdateWithoutSentInvitesInput = {
+  discordId?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  sentTrades?: Prisma.TradeUpdateManyWithoutSenderNestedInput
+  receivedTrades?: Prisma.TradeUpdateManyWithoutRecieverNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutTargetNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSentInvitesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  discordId?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  sentTrades?: Prisma.TradeUncheckedUpdateManyWithoutSenderNestedInput
+  receivedTrades?: Prisma.TradeUncheckedUpdateManyWithoutRecieverNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutTargetNestedInput
+}
+
 export type UserCreateWithoutSentTradesInput = {
   discordId: string
   username: string
+  sentInvites?: Prisma.InviteCreateNestedManyWithoutSenderInput
   receivedTrades?: Prisma.TradeCreateNestedManyWithoutRecieverInput
+  invites?: Prisma.InviteCreateNestedManyWithoutTargetInput
 }
 
 export type UserUncheckedCreateWithoutSentTradesInput = {
   id?: number
   discordId: string
   username: string
+  sentInvites?: Prisma.InviteUncheckedCreateNestedManyWithoutSenderInput
   receivedTrades?: Prisma.TradeUncheckedCreateNestedManyWithoutRecieverInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutTargetInput
 }
 
 export type UserCreateOrConnectWithoutSentTradesInput = {
@@ -387,6 +540,8 @@ export type UserCreateWithoutReceivedTradesInput = {
   discordId: string
   username: string
   sentTrades?: Prisma.TradeCreateNestedManyWithoutSenderInput
+  sentInvites?: Prisma.InviteCreateNestedManyWithoutSenderInput
+  invites?: Prisma.InviteCreateNestedManyWithoutTargetInput
 }
 
 export type UserUncheckedCreateWithoutReceivedTradesInput = {
@@ -394,6 +549,8 @@ export type UserUncheckedCreateWithoutReceivedTradesInput = {
   discordId: string
   username: string
   sentTrades?: Prisma.TradeUncheckedCreateNestedManyWithoutSenderInput
+  sentInvites?: Prisma.InviteUncheckedCreateNestedManyWithoutSenderInput
+  invites?: Prisma.InviteUncheckedCreateNestedManyWithoutTargetInput
 }
 
 export type UserCreateOrConnectWithoutReceivedTradesInput = {
@@ -415,14 +572,18 @@ export type UserUpdateToOneWithWhereWithoutSentTradesInput = {
 export type UserUpdateWithoutSentTradesInput = {
   discordId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
+  sentInvites?: Prisma.InviteUpdateManyWithoutSenderNestedInput
   receivedTrades?: Prisma.TradeUpdateManyWithoutRecieverNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutTargetNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentTradesInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   discordId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
+  sentInvites?: Prisma.InviteUncheckedUpdateManyWithoutSenderNestedInput
   receivedTrades?: Prisma.TradeUncheckedUpdateManyWithoutRecieverNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutTargetNestedInput
 }
 
 export type UserUpsertWithoutReceivedTradesInput = {
@@ -440,6 +601,8 @@ export type UserUpdateWithoutReceivedTradesInput = {
   discordId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   sentTrades?: Prisma.TradeUpdateManyWithoutSenderNestedInput
+  sentInvites?: Prisma.InviteUpdateManyWithoutSenderNestedInput
+  invites?: Prisma.InviteUpdateManyWithoutTargetNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedTradesInput = {
@@ -447,6 +610,8 @@ export type UserUncheckedUpdateWithoutReceivedTradesInput = {
   discordId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   sentTrades?: Prisma.TradeUncheckedUpdateManyWithoutSenderNestedInput
+  sentInvites?: Prisma.InviteUncheckedUpdateManyWithoutSenderNestedInput
+  invites?: Prisma.InviteUncheckedUpdateManyWithoutTargetNestedInput
 }
 
 
@@ -456,12 +621,16 @@ export type UserUncheckedUpdateWithoutReceivedTradesInput = {
 
 export type UserCountOutputType = {
   sentTrades: number
+  sentInvites: number
   receivedTrades: number
+  invites: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sentTrades?: boolean | UserCountOutputTypeCountSentTradesArgs
+  sentInvites?: boolean | UserCountOutputTypeCountSentInvitesArgs
   receivedTrades?: boolean | UserCountOutputTypeCountReceivedTradesArgs
+  invites?: boolean | UserCountOutputTypeCountInvitesArgs
 }
 
 /**
@@ -484,8 +653,22 @@ export type UserCountOutputTypeCountSentTradesArgs<ExtArgs extends runtime.Types
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountSentInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InviteWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountReceivedTradesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.TradeWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InviteWhereInput
 }
 
 
@@ -494,7 +677,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   discordId?: boolean
   username?: boolean
   sentTrades?: boolean | Prisma.User$sentTradesArgs<ExtArgs>
+  sentInvites?: boolean | Prisma.User$sentInvitesArgs<ExtArgs>
   receivedTrades?: boolean | Prisma.User$receivedTradesArgs<ExtArgs>
+  invites?: boolean | Prisma.User$invitesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -519,7 +704,9 @@ export type UserSelectScalar = {
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "discordId" | "username", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sentTrades?: boolean | Prisma.User$sentTradesArgs<ExtArgs>
+  sentInvites?: boolean | Prisma.User$sentInvitesArgs<ExtArgs>
   receivedTrades?: boolean | Prisma.User$receivedTradesArgs<ExtArgs>
+  invites?: boolean | Prisma.User$invitesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -529,7 +716,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     sentTrades: Prisma.$TradePayload<ExtArgs>[]
+    sentInvites: Prisma.$InvitePayload<ExtArgs>[]
     receivedTrades: Prisma.$TradePayload<ExtArgs>[]
+    invites: Prisma.$InvitePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -930,7 +1119,9 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sentTrades<T extends Prisma.User$sentTradesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentTradesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TradePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sentInvites<T extends Prisma.User$sentInvitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   receivedTrades<T extends Prisma.User$receivedTradesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$receivedTradesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TradePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invites<T extends Prisma.User$invitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1378,6 +1569,30 @@ export type User$sentTradesArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
+ * User.sentInvites
+ */
+export type User$sentInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Invite
+   */
+  select?: Prisma.InviteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Invite
+   */
+  omit?: Prisma.InviteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InviteInclude<ExtArgs> | null
+  where?: Prisma.InviteWhereInput
+  orderBy?: Prisma.InviteOrderByWithRelationInput | Prisma.InviteOrderByWithRelationInput[]
+  cursor?: Prisma.InviteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InviteScalarFieldEnum | Prisma.InviteScalarFieldEnum[]
+}
+
+/**
  * User.receivedTrades
  */
 export type User$receivedTradesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1399,6 +1614,30 @@ export type User$receivedTradesArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.TradeScalarFieldEnum | Prisma.TradeScalarFieldEnum[]
+}
+
+/**
+ * User.invites
+ */
+export type User$invitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Invite
+   */
+  select?: Prisma.InviteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Invite
+   */
+  omit?: Prisma.InviteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InviteInclude<ExtArgs> | null
+  where?: Prisma.InviteWhereInput
+  orderBy?: Prisma.InviteOrderByWithRelationInput | Prisma.InviteOrderByWithRelationInput[]
+  cursor?: Prisma.InviteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InviteScalarFieldEnum | Prisma.InviteScalarFieldEnum[]
 }
 
 /**

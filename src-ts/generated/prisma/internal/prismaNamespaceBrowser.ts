@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  Invite: 'Invite',
   Trade: 'Trade',
   Config: 'Config'
 } as const
@@ -78,11 +79,24 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const InviteScalarFieldEnum = {
+  id: 'id',
+  status: 'status',
+  targetId: 'targetId',
+  senderId: 'senderId',
+  createdAt: 'createdAt'
+} as const
+
+export type InviteScalarFieldEnum = (typeof InviteScalarFieldEnum)[keyof typeof InviteScalarFieldEnum]
+
+
 export const TradeScalarFieldEnum = {
   id: 'id',
   channelId: 'channelId',
   recieverStatus: 'recieverStatus',
   senderStatus: 'senderStatus',
+  senderWallet: 'senderWallet',
+  recieverWallet: 'recieverWallet',
   status: 'status',
   selectedCoin: 'selectedCoin',
   network: 'network',
@@ -92,7 +106,8 @@ export const TradeScalarFieldEnum = {
   hideReciever: 'hideReciever',
   senderId: 'senderId',
   recieverId: 'recieverId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  membersId: 'membersId'
 } as const
 
 export type TradeScalarFieldEnum = (typeof TradeScalarFieldEnum)[keyof typeof TradeScalarFieldEnum]
@@ -103,6 +118,8 @@ export const ConfigScalarFieldEnum = {
   guildId: 'guildId',
   publicLogChanId: 'publicLogChanId',
   privateLogChanId: 'privateLogChanId',
+  adminRolesId: 'adminRolesId',
+  mmWallet: 'mmWallet',
   embed_suc_color: 'embed_suc_color'
 } as const
 

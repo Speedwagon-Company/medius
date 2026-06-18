@@ -17,3 +17,12 @@ export const TradeStatus = {
 } as const
 
 export type TradeStatus = (typeof TradeStatus)[keyof typeof TradeStatus]
+
+
+export const InviteStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  DECLINED: 'DECLINED'
+} as const
+
+export type InviteStatus = (typeof InviteStatus)[keyof typeof InviteStatus]

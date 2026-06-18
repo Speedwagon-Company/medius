@@ -39,6 +39,8 @@ export type TradeMinAggregateOutputType = {
   channelId: string | null
   recieverStatus: $Enums.TradeStatus | null
   senderStatus: $Enums.TradeStatus | null
+  senderWallet: string | null
+  recieverWallet: string | null
   status: string | null
   selectedCoin: string | null
   network: string | null
@@ -49,6 +51,7 @@ export type TradeMinAggregateOutputType = {
   senderId: string | null
   recieverId: string | null
   createdAt: Date | null
+  membersId: string | null
 }
 
 export type TradeMaxAggregateOutputType = {
@@ -56,6 +59,8 @@ export type TradeMaxAggregateOutputType = {
   channelId: string | null
   recieverStatus: $Enums.TradeStatus | null
   senderStatus: $Enums.TradeStatus | null
+  senderWallet: string | null
+  recieverWallet: string | null
   status: string | null
   selectedCoin: string | null
   network: string | null
@@ -66,6 +71,7 @@ export type TradeMaxAggregateOutputType = {
   senderId: string | null
   recieverId: string | null
   createdAt: Date | null
+  membersId: string | null
 }
 
 export type TradeCountAggregateOutputType = {
@@ -73,6 +79,8 @@ export type TradeCountAggregateOutputType = {
   channelId: number
   recieverStatus: number
   senderStatus: number
+  senderWallet: number
+  recieverWallet: number
   status: number
   selectedCoin: number
   network: number
@@ -83,6 +91,7 @@ export type TradeCountAggregateOutputType = {
   senderId: number
   recieverId: number
   createdAt: number
+  membersId: number
   _all: number
 }
 
@@ -100,6 +109,8 @@ export type TradeMinAggregateInputType = {
   channelId?: true
   recieverStatus?: true
   senderStatus?: true
+  senderWallet?: true
+  recieverWallet?: true
   status?: true
   selectedCoin?: true
   network?: true
@@ -110,6 +121,7 @@ export type TradeMinAggregateInputType = {
   senderId?: true
   recieverId?: true
   createdAt?: true
+  membersId?: true
 }
 
 export type TradeMaxAggregateInputType = {
@@ -117,6 +129,8 @@ export type TradeMaxAggregateInputType = {
   channelId?: true
   recieverStatus?: true
   senderStatus?: true
+  senderWallet?: true
+  recieverWallet?: true
   status?: true
   selectedCoin?: true
   network?: true
@@ -127,6 +141,7 @@ export type TradeMaxAggregateInputType = {
   senderId?: true
   recieverId?: true
   createdAt?: true
+  membersId?: true
 }
 
 export type TradeCountAggregateInputType = {
@@ -134,6 +149,8 @@ export type TradeCountAggregateInputType = {
   channelId?: true
   recieverStatus?: true
   senderStatus?: true
+  senderWallet?: true
+  recieverWallet?: true
   status?: true
   selectedCoin?: true
   network?: true
@@ -144,6 +161,7 @@ export type TradeCountAggregateInputType = {
   senderId?: true
   recieverId?: true
   createdAt?: true
+  membersId?: true
   _all?: true
 }
 
@@ -235,9 +253,11 @@ export type TradeGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 
 export type TradeGroupByOutputType = {
   id: number
-  channelId: string
+  channelId: string | null
   recieverStatus: $Enums.TradeStatus
   senderStatus: $Enums.TradeStatus
+  senderWallet: string | null
+  recieverWallet: string | null
   status: string
   selectedCoin: string
   network: string
@@ -248,6 +268,7 @@ export type TradeGroupByOutputType = {
   senderId: string | null
   recieverId: string | null
   createdAt: Date
+  membersId: string | null
   _count: TradeCountAggregateOutputType | null
   _avg: TradeAvgAggregateOutputType | null
   _sum: TradeSumAggregateOutputType | null
@@ -275,9 +296,11 @@ export type TradeWhereInput = {
   OR?: Prisma.TradeWhereInput[]
   NOT?: Prisma.TradeWhereInput | Prisma.TradeWhereInput[]
   id?: Prisma.IntFilter<"Trade"> | number
-  channelId?: Prisma.StringFilter<"Trade"> | string
+  channelId?: Prisma.StringNullableFilter<"Trade"> | string | null
   recieverStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  senderWallet?: Prisma.StringNullableFilter<"Trade"> | string | null
+  recieverWallet?: Prisma.StringNullableFilter<"Trade"> | string | null
   status?: Prisma.StringFilter<"Trade"> | string
   selectedCoin?: Prisma.StringFilter<"Trade"> | string
   network?: Prisma.StringFilter<"Trade"> | string
@@ -288,15 +311,18 @@ export type TradeWhereInput = {
   senderId?: Prisma.StringNullableFilter<"Trade"> | string | null
   recieverId?: Prisma.StringNullableFilter<"Trade"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Trade"> | Date | string
+  membersId?: Prisma.StringNullableFilter<"Trade"> | string | null
   sender?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   reciever?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type TradeOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  channelId?: Prisma.SortOrder
+  channelId?: Prisma.SortOrderInput | Prisma.SortOrder
   recieverStatus?: Prisma.SortOrder
   senderStatus?: Prisma.SortOrder
+  senderWallet?: Prisma.SortOrderInput | Prisma.SortOrder
+  recieverWallet?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   selectedCoin?: Prisma.SortOrder
   network?: Prisma.SortOrder
@@ -307,6 +333,7 @@ export type TradeOrderByWithRelationInput = {
   senderId?: Prisma.SortOrderInput | Prisma.SortOrder
   recieverId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  membersId?: Prisma.SortOrderInput | Prisma.SortOrder
   sender?: Prisma.UserOrderByWithRelationInput
   reciever?: Prisma.UserOrderByWithRelationInput
 }
@@ -319,6 +346,8 @@ export type TradeWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.TradeWhereInput | Prisma.TradeWhereInput[]
   recieverStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  senderWallet?: Prisma.StringNullableFilter<"Trade"> | string | null
+  recieverWallet?: Prisma.StringNullableFilter<"Trade"> | string | null
   status?: Prisma.StringFilter<"Trade"> | string
   selectedCoin?: Prisma.StringFilter<"Trade"> | string
   network?: Prisma.StringFilter<"Trade"> | string
@@ -329,15 +358,18 @@ export type TradeWhereUniqueInput = Prisma.AtLeast<{
   senderId?: Prisma.StringNullableFilter<"Trade"> | string | null
   recieverId?: Prisma.StringNullableFilter<"Trade"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Trade"> | Date | string
+  membersId?: Prisma.StringNullableFilter<"Trade"> | string | null
   sender?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   reciever?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id" | "channelId">
 
 export type TradeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  channelId?: Prisma.SortOrder
+  channelId?: Prisma.SortOrderInput | Prisma.SortOrder
   recieverStatus?: Prisma.SortOrder
   senderStatus?: Prisma.SortOrder
+  senderWallet?: Prisma.SortOrderInput | Prisma.SortOrder
+  recieverWallet?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   selectedCoin?: Prisma.SortOrder
   network?: Prisma.SortOrder
@@ -348,6 +380,7 @@ export type TradeOrderByWithAggregationInput = {
   senderId?: Prisma.SortOrderInput | Prisma.SortOrder
   recieverId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  membersId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TradeCountOrderByAggregateInput
   _avg?: Prisma.TradeAvgOrderByAggregateInput
   _max?: Prisma.TradeMaxOrderByAggregateInput
@@ -360,9 +393,11 @@ export type TradeScalarWhereWithAggregatesInput = {
   OR?: Prisma.TradeScalarWhereWithAggregatesInput[]
   NOT?: Prisma.TradeScalarWhereWithAggregatesInput | Prisma.TradeScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Trade"> | number
-  channelId?: Prisma.StringWithAggregatesFilter<"Trade"> | string
+  channelId?: Prisma.StringNullableWithAggregatesFilter<"Trade"> | string | null
   recieverStatus?: Prisma.EnumTradeStatusWithAggregatesFilter<"Trade"> | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusWithAggregatesFilter<"Trade"> | $Enums.TradeStatus
+  senderWallet?: Prisma.StringNullableWithAggregatesFilter<"Trade"> | string | null
+  recieverWallet?: Prisma.StringNullableWithAggregatesFilter<"Trade"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"Trade"> | string
   selectedCoin?: Prisma.StringWithAggregatesFilter<"Trade"> | string
   network?: Prisma.StringWithAggregatesFilter<"Trade"> | string
@@ -373,12 +408,15 @@ export type TradeScalarWhereWithAggregatesInput = {
   senderId?: Prisma.StringNullableWithAggregatesFilter<"Trade"> | string | null
   recieverId?: Prisma.StringNullableWithAggregatesFilter<"Trade"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Trade"> | Date | string
+  membersId?: Prisma.StringNullableWithAggregatesFilter<"Trade"> | string | null
 }
 
 export type TradeCreateInput = {
-  channelId: string
+  channelId?: string | null
   recieverStatus?: $Enums.TradeStatus
   senderStatus?: $Enums.TradeStatus
+  senderWallet?: string | null
+  recieverWallet?: string | null
   status?: string
   selectedCoin: string
   network: string
@@ -387,15 +425,18 @@ export type TradeCreateInput = {
   hideSender?: boolean
   hideReciever?: boolean
   createdAt?: Date | string
+  membersId?: string | null
   sender?: Prisma.UserCreateNestedOneWithoutSentTradesInput
   reciever?: Prisma.UserCreateNestedOneWithoutReceivedTradesInput
 }
 
 export type TradeUncheckedCreateInput = {
   id?: number
-  channelId: string
+  channelId?: string | null
   recieverStatus?: $Enums.TradeStatus
   senderStatus?: $Enums.TradeStatus
+  senderWallet?: string | null
+  recieverWallet?: string | null
   status?: string
   selectedCoin: string
   network: string
@@ -406,12 +447,15 @@ export type TradeUncheckedCreateInput = {
   senderId?: string | null
   recieverId?: string | null
   createdAt?: Date | string
+  membersId?: string | null
 }
 
 export type TradeUpdateInput = {
-  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
   network?: Prisma.StringFieldUpdateOperationsInput | string
@@ -420,15 +464,18 @@ export type TradeUpdateInput = {
   hideSender?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hideReciever?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membersId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sender?: Prisma.UserUpdateOneWithoutSentTradesNestedInput
   reciever?: Prisma.UserUpdateOneWithoutReceivedTradesNestedInput
 }
 
 export type TradeUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
   network?: Prisma.StringFieldUpdateOperationsInput | string
@@ -439,13 +486,16 @@ export type TradeUncheckedUpdateInput = {
   senderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membersId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeCreateManyInput = {
   id?: number
-  channelId: string
+  channelId?: string | null
   recieverStatus?: $Enums.TradeStatus
   senderStatus?: $Enums.TradeStatus
+  senderWallet?: string | null
+  recieverWallet?: string | null
   status?: string
   selectedCoin: string
   network: string
@@ -456,12 +506,15 @@ export type TradeCreateManyInput = {
   senderId?: string | null
   recieverId?: string | null
   createdAt?: Date | string
+  membersId?: string | null
 }
 
 export type TradeUpdateManyMutationInput = {
-  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
   network?: Prisma.StringFieldUpdateOperationsInput | string
@@ -470,13 +523,16 @@ export type TradeUpdateManyMutationInput = {
   hideSender?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hideReciever?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membersId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
   network?: Prisma.StringFieldUpdateOperationsInput | string
@@ -487,6 +543,7 @@ export type TradeUncheckedUpdateManyInput = {
   senderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membersId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeListRelationFilter = {
@@ -504,6 +561,8 @@ export type TradeCountOrderByAggregateInput = {
   channelId?: Prisma.SortOrder
   recieverStatus?: Prisma.SortOrder
   senderStatus?: Prisma.SortOrder
+  senderWallet?: Prisma.SortOrder
+  recieverWallet?: Prisma.SortOrder
   status?: Prisma.SortOrder
   selectedCoin?: Prisma.SortOrder
   network?: Prisma.SortOrder
@@ -514,6 +573,7 @@ export type TradeCountOrderByAggregateInput = {
   senderId?: Prisma.SortOrder
   recieverId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  membersId?: Prisma.SortOrder
 }
 
 export type TradeAvgOrderByAggregateInput = {
@@ -525,6 +585,8 @@ export type TradeMaxOrderByAggregateInput = {
   channelId?: Prisma.SortOrder
   recieverStatus?: Prisma.SortOrder
   senderStatus?: Prisma.SortOrder
+  senderWallet?: Prisma.SortOrder
+  recieverWallet?: Prisma.SortOrder
   status?: Prisma.SortOrder
   selectedCoin?: Prisma.SortOrder
   network?: Prisma.SortOrder
@@ -535,6 +597,7 @@ export type TradeMaxOrderByAggregateInput = {
   senderId?: Prisma.SortOrder
   recieverId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  membersId?: Prisma.SortOrder
 }
 
 export type TradeMinOrderByAggregateInput = {
@@ -542,6 +605,8 @@ export type TradeMinOrderByAggregateInput = {
   channelId?: Prisma.SortOrder
   recieverStatus?: Prisma.SortOrder
   senderStatus?: Prisma.SortOrder
+  senderWallet?: Prisma.SortOrder
+  recieverWallet?: Prisma.SortOrder
   status?: Prisma.SortOrder
   selectedCoin?: Prisma.SortOrder
   network?: Prisma.SortOrder
@@ -552,6 +617,7 @@ export type TradeMinOrderByAggregateInput = {
   senderId?: Prisma.SortOrder
   recieverId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  membersId?: Prisma.SortOrder
 }
 
 export type TradeSumOrderByAggregateInput = {
@@ -650,18 +716,12 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
-}
-
 export type TradeCreateWithoutSenderInput = {
-  channelId: string
+  channelId?: string | null
   recieverStatus?: $Enums.TradeStatus
   senderStatus?: $Enums.TradeStatus
+  senderWallet?: string | null
+  recieverWallet?: string | null
   status?: string
   selectedCoin: string
   network: string
@@ -670,14 +730,17 @@ export type TradeCreateWithoutSenderInput = {
   hideSender?: boolean
   hideReciever?: boolean
   createdAt?: Date | string
+  membersId?: string | null
   reciever?: Prisma.UserCreateNestedOneWithoutReceivedTradesInput
 }
 
 export type TradeUncheckedCreateWithoutSenderInput = {
   id?: number
-  channelId: string
+  channelId?: string | null
   recieverStatus?: $Enums.TradeStatus
   senderStatus?: $Enums.TradeStatus
+  senderWallet?: string | null
+  recieverWallet?: string | null
   status?: string
   selectedCoin: string
   network: string
@@ -687,6 +750,7 @@ export type TradeUncheckedCreateWithoutSenderInput = {
   hideReciever?: boolean
   recieverId?: string | null
   createdAt?: Date | string
+  membersId?: string | null
 }
 
 export type TradeCreateOrConnectWithoutSenderInput = {
@@ -699,9 +763,11 @@ export type TradeCreateManySenderInputEnvelope = {
 }
 
 export type TradeCreateWithoutRecieverInput = {
-  channelId: string
+  channelId?: string | null
   recieverStatus?: $Enums.TradeStatus
   senderStatus?: $Enums.TradeStatus
+  senderWallet?: string | null
+  recieverWallet?: string | null
   status?: string
   selectedCoin: string
   network: string
@@ -710,14 +776,17 @@ export type TradeCreateWithoutRecieverInput = {
   hideSender?: boolean
   hideReciever?: boolean
   createdAt?: Date | string
+  membersId?: string | null
   sender?: Prisma.UserCreateNestedOneWithoutSentTradesInput
 }
 
 export type TradeUncheckedCreateWithoutRecieverInput = {
   id?: number
-  channelId: string
+  channelId?: string | null
   recieverStatus?: $Enums.TradeStatus
   senderStatus?: $Enums.TradeStatus
+  senderWallet?: string | null
+  recieverWallet?: string | null
   status?: string
   selectedCoin: string
   network: string
@@ -727,6 +796,7 @@ export type TradeUncheckedCreateWithoutRecieverInput = {
   hideReciever?: boolean
   senderId?: string | null
   createdAt?: Date | string
+  membersId?: string | null
 }
 
 export type TradeCreateOrConnectWithoutRecieverInput = {
@@ -759,9 +829,11 @@ export type TradeScalarWhereInput = {
   OR?: Prisma.TradeScalarWhereInput[]
   NOT?: Prisma.TradeScalarWhereInput | Prisma.TradeScalarWhereInput[]
   id?: Prisma.IntFilter<"Trade"> | number
-  channelId?: Prisma.StringFilter<"Trade"> | string
+  channelId?: Prisma.StringNullableFilter<"Trade"> | string | null
   recieverStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFilter<"Trade"> | $Enums.TradeStatus
+  senderWallet?: Prisma.StringNullableFilter<"Trade"> | string | null
+  recieverWallet?: Prisma.StringNullableFilter<"Trade"> | string | null
   status?: Prisma.StringFilter<"Trade"> | string
   selectedCoin?: Prisma.StringFilter<"Trade"> | string
   network?: Prisma.StringFilter<"Trade"> | string
@@ -772,6 +844,7 @@ export type TradeScalarWhereInput = {
   senderId?: Prisma.StringNullableFilter<"Trade"> | string | null
   recieverId?: Prisma.StringNullableFilter<"Trade"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Trade"> | Date | string
+  membersId?: Prisma.StringNullableFilter<"Trade"> | string | null
 }
 
 export type TradeUpsertWithWhereUniqueWithoutRecieverInput = {
@@ -792,9 +865,11 @@ export type TradeUpdateManyWithWhereWithoutRecieverInput = {
 
 export type TradeCreateManySenderInput = {
   id?: number
-  channelId: string
+  channelId?: string | null
   recieverStatus?: $Enums.TradeStatus
   senderStatus?: $Enums.TradeStatus
+  senderWallet?: string | null
+  recieverWallet?: string | null
   status?: string
   selectedCoin: string
   network: string
@@ -804,13 +879,16 @@ export type TradeCreateManySenderInput = {
   hideReciever?: boolean
   recieverId?: string | null
   createdAt?: Date | string
+  membersId?: string | null
 }
 
 export type TradeCreateManyRecieverInput = {
   id?: number
-  channelId: string
+  channelId?: string | null
   recieverStatus?: $Enums.TradeStatus
   senderStatus?: $Enums.TradeStatus
+  senderWallet?: string | null
+  recieverWallet?: string | null
   status?: string
   selectedCoin: string
   network: string
@@ -820,12 +898,15 @@ export type TradeCreateManyRecieverInput = {
   hideReciever?: boolean
   senderId?: string | null
   createdAt?: Date | string
+  membersId?: string | null
 }
 
 export type TradeUpdateWithoutSenderInput = {
-  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
   network?: Prisma.StringFieldUpdateOperationsInput | string
@@ -834,14 +915,17 @@ export type TradeUpdateWithoutSenderInput = {
   hideSender?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hideReciever?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membersId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reciever?: Prisma.UserUpdateOneWithoutReceivedTradesNestedInput
 }
 
 export type TradeUncheckedUpdateWithoutSenderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
   network?: Prisma.StringFieldUpdateOperationsInput | string
@@ -851,13 +935,16 @@ export type TradeUncheckedUpdateWithoutSenderInput = {
   hideReciever?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recieverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membersId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeUncheckedUpdateManyWithoutSenderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
   network?: Prisma.StringFieldUpdateOperationsInput | string
@@ -867,12 +954,15 @@ export type TradeUncheckedUpdateManyWithoutSenderInput = {
   hideReciever?: Prisma.BoolFieldUpdateOperationsInput | boolean
   recieverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membersId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeUpdateWithoutRecieverInput = {
-  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
   network?: Prisma.StringFieldUpdateOperationsInput | string
@@ -881,14 +971,17 @@ export type TradeUpdateWithoutRecieverInput = {
   hideSender?: Prisma.BoolFieldUpdateOperationsInput | boolean
   hideReciever?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membersId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sender?: Prisma.UserUpdateOneWithoutSentTradesNestedInput
 }
 
 export type TradeUncheckedUpdateWithoutRecieverInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
   network?: Prisma.StringFieldUpdateOperationsInput | string
@@ -898,13 +991,16 @@ export type TradeUncheckedUpdateWithoutRecieverInput = {
   hideReciever?: Prisma.BoolFieldUpdateOperationsInput | boolean
   senderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membersId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TradeUncheckedUpdateManyWithoutRecieverInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  channelId?: Prisma.StringFieldUpdateOperationsInput | string
+  channelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recieverStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
   senderStatus?: Prisma.EnumTradeStatusFieldUpdateOperationsInput | $Enums.TradeStatus
+  senderWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recieverWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   selectedCoin?: Prisma.StringFieldUpdateOperationsInput | string
   network?: Prisma.StringFieldUpdateOperationsInput | string
@@ -914,6 +1010,7 @@ export type TradeUncheckedUpdateManyWithoutRecieverInput = {
   hideReciever?: Prisma.BoolFieldUpdateOperationsInput | boolean
   senderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membersId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -923,6 +1020,8 @@ export type TradeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   channelId?: boolean
   recieverStatus?: boolean
   senderStatus?: boolean
+  senderWallet?: boolean
+  recieverWallet?: boolean
   status?: boolean
   selectedCoin?: boolean
   network?: boolean
@@ -933,6 +1032,7 @@ export type TradeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   senderId?: boolean
   recieverId?: boolean
   createdAt?: boolean
+  membersId?: boolean
   sender?: boolean | Prisma.Trade$senderArgs<ExtArgs>
   reciever?: boolean | Prisma.Trade$recieverArgs<ExtArgs>
 }, ExtArgs["result"]["trade"]>
@@ -942,6 +1042,8 @@ export type TradeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   channelId?: boolean
   recieverStatus?: boolean
   senderStatus?: boolean
+  senderWallet?: boolean
+  recieverWallet?: boolean
   status?: boolean
   selectedCoin?: boolean
   network?: boolean
@@ -952,6 +1054,7 @@ export type TradeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   senderId?: boolean
   recieverId?: boolean
   createdAt?: boolean
+  membersId?: boolean
   sender?: boolean | Prisma.Trade$senderArgs<ExtArgs>
   reciever?: boolean | Prisma.Trade$recieverArgs<ExtArgs>
 }, ExtArgs["result"]["trade"]>
@@ -961,6 +1064,8 @@ export type TradeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   channelId?: boolean
   recieverStatus?: boolean
   senderStatus?: boolean
+  senderWallet?: boolean
+  recieverWallet?: boolean
   status?: boolean
   selectedCoin?: boolean
   network?: boolean
@@ -971,6 +1076,7 @@ export type TradeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   senderId?: boolean
   recieverId?: boolean
   createdAt?: boolean
+  membersId?: boolean
   sender?: boolean | Prisma.Trade$senderArgs<ExtArgs>
   reciever?: boolean | Prisma.Trade$recieverArgs<ExtArgs>
 }, ExtArgs["result"]["trade"]>
@@ -980,6 +1086,8 @@ export type TradeSelectScalar = {
   channelId?: boolean
   recieverStatus?: boolean
   senderStatus?: boolean
+  senderWallet?: boolean
+  recieverWallet?: boolean
   status?: boolean
   selectedCoin?: boolean
   network?: boolean
@@ -990,9 +1098,10 @@ export type TradeSelectScalar = {
   senderId?: boolean
   recieverId?: boolean
   createdAt?: boolean
+  membersId?: boolean
 }
 
-export type TradeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "channelId" | "recieverStatus" | "senderStatus" | "status" | "selectedCoin" | "network" | "calledSupport" | "received" | "hideSender" | "hideReciever" | "senderId" | "recieverId" | "createdAt", ExtArgs["result"]["trade"]>
+export type TradeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "channelId" | "recieverStatus" | "senderStatus" | "senderWallet" | "recieverWallet" | "status" | "selectedCoin" | "network" | "calledSupport" | "received" | "hideSender" | "hideReciever" | "senderId" | "recieverId" | "createdAt" | "membersId", ExtArgs["result"]["trade"]>
 export type TradeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sender?: boolean | Prisma.Trade$senderArgs<ExtArgs>
   reciever?: boolean | Prisma.Trade$recieverArgs<ExtArgs>
@@ -1014,9 +1123,11 @@ export type $TradePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    channelId: string
+    channelId: string | null
     recieverStatus: $Enums.TradeStatus
     senderStatus: $Enums.TradeStatus
+    senderWallet: string | null
+    recieverWallet: string | null
     status: string
     selectedCoin: string
     network: string
@@ -1027,6 +1138,7 @@ export type $TradePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     senderId: string | null
     recieverId: string | null
     createdAt: Date
+    membersId: string | null
   }, ExtArgs["result"]["trade"]>
   composites: {}
 }
@@ -1456,6 +1568,8 @@ export interface TradeFieldRefs {
   readonly channelId: Prisma.FieldRef<"Trade", 'String'>
   readonly recieverStatus: Prisma.FieldRef<"Trade", 'TradeStatus'>
   readonly senderStatus: Prisma.FieldRef<"Trade", 'TradeStatus'>
+  readonly senderWallet: Prisma.FieldRef<"Trade", 'String'>
+  readonly recieverWallet: Prisma.FieldRef<"Trade", 'String'>
   readonly status: Prisma.FieldRef<"Trade", 'String'>
   readonly selectedCoin: Prisma.FieldRef<"Trade", 'String'>
   readonly network: Prisma.FieldRef<"Trade", 'String'>
@@ -1466,6 +1580,7 @@ export interface TradeFieldRefs {
   readonly senderId: Prisma.FieldRef<"Trade", 'String'>
   readonly recieverId: Prisma.FieldRef<"Trade", 'String'>
   readonly createdAt: Prisma.FieldRef<"Trade", 'DateTime'>
+  readonly membersId: Prisma.FieldRef<"Trade", 'String'>
 }
     
 

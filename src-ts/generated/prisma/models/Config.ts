@@ -39,6 +39,8 @@ export type ConfigMinAggregateOutputType = {
   guildId: string | null
   publicLogChanId: string | null
   privateLogChanId: string | null
+  adminRolesId: string | null
+  mmWallet: string | null
   embed_suc_color: string | null
 }
 
@@ -47,6 +49,8 @@ export type ConfigMaxAggregateOutputType = {
   guildId: string | null
   publicLogChanId: string | null
   privateLogChanId: string | null
+  adminRolesId: string | null
+  mmWallet: string | null
   embed_suc_color: string | null
 }
 
@@ -55,6 +59,8 @@ export type ConfigCountAggregateOutputType = {
   guildId: number
   publicLogChanId: number
   privateLogChanId: number
+  adminRolesId: number
+  mmWallet: number
   embed_suc_color: number
   _all: number
 }
@@ -73,6 +79,8 @@ export type ConfigMinAggregateInputType = {
   guildId?: true
   publicLogChanId?: true
   privateLogChanId?: true
+  adminRolesId?: true
+  mmWallet?: true
   embed_suc_color?: true
 }
 
@@ -81,6 +89,8 @@ export type ConfigMaxAggregateInputType = {
   guildId?: true
   publicLogChanId?: true
   privateLogChanId?: true
+  adminRolesId?: true
+  mmWallet?: true
   embed_suc_color?: true
 }
 
@@ -89,6 +99,8 @@ export type ConfigCountAggregateInputType = {
   guildId?: true
   publicLogChanId?: true
   privateLogChanId?: true
+  adminRolesId?: true
+  mmWallet?: true
   embed_suc_color?: true
   _all?: true
 }
@@ -184,6 +196,8 @@ export type ConfigGroupByOutputType = {
   guildId: string | null
   publicLogChanId: string | null
   privateLogChanId: string | null
+  adminRolesId: string | null
+  mmWallet: string | null
   embed_suc_color: string
   _count: ConfigCountAggregateOutputType | null
   _avg: ConfigAvgAggregateOutputType | null
@@ -215,6 +229,8 @@ export type ConfigWhereInput = {
   guildId?: Prisma.StringNullableFilter<"Config"> | string | null
   publicLogChanId?: Prisma.StringNullableFilter<"Config"> | string | null
   privateLogChanId?: Prisma.StringNullableFilter<"Config"> | string | null
+  adminRolesId?: Prisma.StringNullableFilter<"Config"> | string | null
+  mmWallet?: Prisma.StringNullableFilter<"Config"> | string | null
   embed_suc_color?: Prisma.StringFilter<"Config"> | string
 }
 
@@ -223,6 +239,8 @@ export type ConfigOrderByWithRelationInput = {
   guildId?: Prisma.SortOrderInput | Prisma.SortOrder
   publicLogChanId?: Prisma.SortOrderInput | Prisma.SortOrder
   privateLogChanId?: Prisma.SortOrderInput | Prisma.SortOrder
+  adminRolesId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mmWallet?: Prisma.SortOrderInput | Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
@@ -234,6 +252,8 @@ export type ConfigWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ConfigWhereInput | Prisma.ConfigWhereInput[]
   publicLogChanId?: Prisma.StringNullableFilter<"Config"> | string | null
   privateLogChanId?: Prisma.StringNullableFilter<"Config"> | string | null
+  adminRolesId?: Prisma.StringNullableFilter<"Config"> | string | null
+  mmWallet?: Prisma.StringNullableFilter<"Config"> | string | null
   embed_suc_color?: Prisma.StringFilter<"Config"> | string
 }, "id" | "guildId">
 
@@ -242,6 +262,8 @@ export type ConfigOrderByWithAggregationInput = {
   guildId?: Prisma.SortOrderInput | Prisma.SortOrder
   publicLogChanId?: Prisma.SortOrderInput | Prisma.SortOrder
   privateLogChanId?: Prisma.SortOrderInput | Prisma.SortOrder
+  adminRolesId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mmWallet?: Prisma.SortOrderInput | Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
   _count?: Prisma.ConfigCountOrderByAggregateInput
   _avg?: Prisma.ConfigAvgOrderByAggregateInput
@@ -258,6 +280,8 @@ export type ConfigScalarWhereWithAggregatesInput = {
   guildId?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
   publicLogChanId?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
   privateLogChanId?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
+  adminRolesId?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
+  mmWallet?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
   embed_suc_color?: Prisma.StringWithAggregatesFilter<"Config"> | string
 }
 
@@ -265,6 +289,8 @@ export type ConfigCreateInput = {
   guildId?: string | null
   publicLogChanId?: string | null
   privateLogChanId?: string | null
+  adminRolesId?: string | null
+  mmWallet?: string | null
   embed_suc_color: string
 }
 
@@ -273,6 +299,8 @@ export type ConfigUncheckedCreateInput = {
   guildId?: string | null
   publicLogChanId?: string | null
   privateLogChanId?: string | null
+  adminRolesId?: string | null
+  mmWallet?: string | null
   embed_suc_color: string
 }
 
@@ -280,6 +308,8 @@ export type ConfigUpdateInput = {
   guildId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminRolesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mmWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -288,6 +318,8 @@ export type ConfigUncheckedUpdateInput = {
   guildId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminRolesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mmWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -296,6 +328,8 @@ export type ConfigCreateManyInput = {
   guildId?: string | null
   publicLogChanId?: string | null
   privateLogChanId?: string | null
+  adminRolesId?: string | null
+  mmWallet?: string | null
   embed_suc_color: string
 }
 
@@ -303,6 +337,8 @@ export type ConfigUpdateManyMutationInput = {
   guildId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminRolesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mmWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -311,6 +347,8 @@ export type ConfigUncheckedUpdateManyInput = {
   guildId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   privateLogChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminRolesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mmWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -319,6 +357,8 @@ export type ConfigCountOrderByAggregateInput = {
   guildId?: Prisma.SortOrder
   publicLogChanId?: Prisma.SortOrder
   privateLogChanId?: Prisma.SortOrder
+  adminRolesId?: Prisma.SortOrder
+  mmWallet?: Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
@@ -331,6 +371,8 @@ export type ConfigMaxOrderByAggregateInput = {
   guildId?: Prisma.SortOrder
   publicLogChanId?: Prisma.SortOrder
   privateLogChanId?: Prisma.SortOrder
+  adminRolesId?: Prisma.SortOrder
+  mmWallet?: Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
@@ -339,6 +381,8 @@ export type ConfigMinOrderByAggregateInput = {
   guildId?: Prisma.SortOrder
   publicLogChanId?: Prisma.SortOrder
   privateLogChanId?: Prisma.SortOrder
+  adminRolesId?: Prisma.SortOrder
+  mmWallet?: Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
@@ -353,6 +397,8 @@ export type ConfigSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   guildId?: boolean
   publicLogChanId?: boolean
   privateLogChanId?: boolean
+  adminRolesId?: boolean
+  mmWallet?: boolean
   embed_suc_color?: boolean
 }, ExtArgs["result"]["config"]>
 
@@ -361,6 +407,8 @@ export type ConfigSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   guildId?: boolean
   publicLogChanId?: boolean
   privateLogChanId?: boolean
+  adminRolesId?: boolean
+  mmWallet?: boolean
   embed_suc_color?: boolean
 }, ExtArgs["result"]["config"]>
 
@@ -369,6 +417,8 @@ export type ConfigSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   guildId?: boolean
   publicLogChanId?: boolean
   privateLogChanId?: boolean
+  adminRolesId?: boolean
+  mmWallet?: boolean
   embed_suc_color?: boolean
 }, ExtArgs["result"]["config"]>
 
@@ -377,10 +427,12 @@ export type ConfigSelectScalar = {
   guildId?: boolean
   publicLogChanId?: boolean
   privateLogChanId?: boolean
+  adminRolesId?: boolean
+  mmWallet?: boolean
   embed_suc_color?: boolean
 }
 
-export type ConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "guildId" | "publicLogChanId" | "privateLogChanId" | "embed_suc_color", ExtArgs["result"]["config"]>
+export type ConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "guildId" | "publicLogChanId" | "privateLogChanId" | "adminRolesId" | "mmWallet" | "embed_suc_color", ExtArgs["result"]["config"]>
 
 export type $ConfigPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Config"
@@ -390,6 +442,8 @@ export type $ConfigPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     guildId: string | null
     publicLogChanId: string | null
     privateLogChanId: string | null
+    adminRolesId: string | null
+    mmWallet: string | null
     embed_suc_color: string
   }, ExtArgs["result"]["config"]>
   composites: {}
@@ -818,6 +872,8 @@ export interface ConfigFieldRefs {
   readonly guildId: Prisma.FieldRef<"Config", 'String'>
   readonly publicLogChanId: Prisma.FieldRef<"Config", 'String'>
   readonly privateLogChanId: Prisma.FieldRef<"Config", 'String'>
+  readonly adminRolesId: Prisma.FieldRef<"Config", 'String'>
+  readonly mmWallet: Prisma.FieldRef<"Config", 'String'>
   readonly embed_suc_color: Prisma.FieldRef<"Config", 'String'>
 }
     
