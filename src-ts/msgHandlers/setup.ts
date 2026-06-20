@@ -66,16 +66,19 @@ async function handleSubCmds(msg: Message) {
     await handleHelp(msg);
     return "dont"
   }
-  if (!commads.has(`${cmd[0]}`) || !subCmds.has(subCmd)){
-    throw new InvalidCmdException("");
-  }
   const id = msg.guildId || "";
-  console.log(id, cmd[2]);
-  if (subCmd === "init") {
+  if (cmd[0] === "-init") {
     await prisma.config.create({
       data: { guildId: id || "", embed_suc_color: "0xff1a18" },
     });
+    return "dont"
   }
+  if (!commads.has(`${cmd[0]}`) || !subCmds.has(subCmd)){
+    throw new InvalidCmdException("");
+  }
+
+  console.log(id, cmd[2]);
+
   const guild = msg.guild;
   if (subCmd === "publicLogChanId") {
     const chan = await getChan(guild, cmd[2]);
