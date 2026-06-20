@@ -412,7 +412,7 @@ async function createTicketChannelAndAskRoles(
     // console.log(user)
     const guild = interaction.guild;
     const currentUser = interaction.member;
-
+    const cfg = cfgService.get(interaction.guildId)
     const channelName = `trade-${currentUser.user.username}-${user.username}`.toLowerCase().replace(/[^a-z0-9-]/g, "-");
     const channel: GuildBasedChannel | null = await interaction.guild.channels.fetch(tradeRoomId) as TextChannel
     const thread: any = await channel.threads.create({
@@ -824,11 +824,11 @@ function getRestTradeUser(trade: Trade) {
 
 
 async function adminLogManyTrades(guild: Guild, chan: any, user: any, tradeCount: number) {
-  const cfg = await cfgService.get(guild.id)
-  console.log("cache config", cfg)
-    const logChan: any = await guild.channels.fetch(cfg.privateLogChanId || "")
-    const link = `https://discord.com/channels/${guild.id}/${chan.id}`
-    await logChan.send({embeds:[await createSuccessEmbed(`Many trades alert`, `${user} has to many pending trades ${tradeCount} \n${link}`)]})
+  // const cfg = await cfgService.get(guild.id)
+  // console.log("cache config", cfg)
+  //   const logChan: any = await guild.channels.fetch(cfg.privateLogChanId || "")
+  //   const link = `https://discord.com/channels/${guild.id}/${chan.id}`
+  //   await logChan.send({embeds:[await createSuccessEmbed(`Many trades alert`, `${user} has to many pending trades ${tradeCount} \n${link}`)]})
 }
 
 async function addAnonOption(trade: Trade, chan: TextChannel) {
