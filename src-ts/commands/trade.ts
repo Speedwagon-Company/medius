@@ -92,7 +92,7 @@ const handlers: Record<string, SubcommandFn> = {
         if(target?.id == interaction.member?.user.id) {
             return await interaction.reply({content:"You cannot do this", flags:MessageFlags.Ephemeral} )
         }
-        throw Error("IDK MAN")
+        // throw Error("IDK MAN")
 
         // if(target?.user.bot)
         // @ts-ignore
