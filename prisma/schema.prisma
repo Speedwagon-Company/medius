@@ -92,5 +92,7 @@ model Config {
   adminRolesId String?
   mmWallet String?
   supportRequestChanId String?
+  tradeRoomChanId String?
+
   embed_suc_color String
 }

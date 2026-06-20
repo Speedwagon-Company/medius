@@ -790,6 +790,7 @@ export const ConfigScalarFieldEnum = {
   adminRolesId: 'adminRolesId',
   mmWallet: 'mmWallet',
   supportRequestChanId: 'supportRequestChanId',
+  tradeRoomChanId: 'tradeRoomChanId',
   embed_suc_color: 'embed_suc_color'
 } as const
 

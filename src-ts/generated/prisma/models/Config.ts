@@ -42,6 +42,7 @@ export type ConfigMinAggregateOutputType = {
   adminRolesId: string | null
   mmWallet: string | null
   supportRequestChanId: string | null
+  tradeRoomChanId: string | null
   embed_suc_color: string | null
 }
 
@@ -53,6 +54,7 @@ export type ConfigMaxAggregateOutputType = {
   adminRolesId: string | null
   mmWallet: string | null
   supportRequestChanId: string | null
+  tradeRoomChanId: string | null
   embed_suc_color: string | null
 }
 
@@ -64,6 +66,7 @@ export type ConfigCountAggregateOutputType = {
   adminRolesId: number
   mmWallet: number
   supportRequestChanId: number
+  tradeRoomChanId: number
   embed_suc_color: number
   _all: number
 }
@@ -85,6 +88,7 @@ export type ConfigMinAggregateInputType = {
   adminRolesId?: true
   mmWallet?: true
   supportRequestChanId?: true
+  tradeRoomChanId?: true
   embed_suc_color?: true
 }
 
@@ -96,6 +100,7 @@ export type ConfigMaxAggregateInputType = {
   adminRolesId?: true
   mmWallet?: true
   supportRequestChanId?: true
+  tradeRoomChanId?: true
   embed_suc_color?: true
 }
 
@@ -107,6 +112,7 @@ export type ConfigCountAggregateInputType = {
   adminRolesId?: true
   mmWallet?: true
   supportRequestChanId?: true
+  tradeRoomChanId?: true
   embed_suc_color?: true
   _all?: true
 }
@@ -205,6 +211,7 @@ export type ConfigGroupByOutputType = {
   adminRolesId: string | null
   mmWallet: string | null
   supportRequestChanId: string | null
+  tradeRoomChanId: string | null
   embed_suc_color: string
   _count: ConfigCountAggregateOutputType | null
   _avg: ConfigAvgAggregateOutputType | null
@@ -239,6 +246,7 @@ export type ConfigWhereInput = {
   adminRolesId?: Prisma.StringNullableFilter<"Config"> | string | null
   mmWallet?: Prisma.StringNullableFilter<"Config"> | string | null
   supportRequestChanId?: Prisma.StringNullableFilter<"Config"> | string | null
+  tradeRoomChanId?: Prisma.StringNullableFilter<"Config"> | string | null
   embed_suc_color?: Prisma.StringFilter<"Config"> | string
 }
 
@@ -250,6 +258,7 @@ export type ConfigOrderByWithRelationInput = {
   adminRolesId?: Prisma.SortOrderInput | Prisma.SortOrder
   mmWallet?: Prisma.SortOrderInput | Prisma.SortOrder
   supportRequestChanId?: Prisma.SortOrderInput | Prisma.SortOrder
+  tradeRoomChanId?: Prisma.SortOrderInput | Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
@@ -264,6 +273,7 @@ export type ConfigWhereUniqueInput = Prisma.AtLeast<{
   adminRolesId?: Prisma.StringNullableFilter<"Config"> | string | null
   mmWallet?: Prisma.StringNullableFilter<"Config"> | string | null
   supportRequestChanId?: Prisma.StringNullableFilter<"Config"> | string | null
+  tradeRoomChanId?: Prisma.StringNullableFilter<"Config"> | string | null
   embed_suc_color?: Prisma.StringFilter<"Config"> | string
 }, "id" | "guildId">
 
@@ -275,6 +285,7 @@ export type ConfigOrderByWithAggregationInput = {
   adminRolesId?: Prisma.SortOrderInput | Prisma.SortOrder
   mmWallet?: Prisma.SortOrderInput | Prisma.SortOrder
   supportRequestChanId?: Prisma.SortOrderInput | Prisma.SortOrder
+  tradeRoomChanId?: Prisma.SortOrderInput | Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
   _count?: Prisma.ConfigCountOrderByAggregateInput
   _avg?: Prisma.ConfigAvgOrderByAggregateInput
@@ -294,6 +305,7 @@ export type ConfigScalarWhereWithAggregatesInput = {
   adminRolesId?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
   mmWallet?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
   supportRequestChanId?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
+  tradeRoomChanId?: Prisma.StringNullableWithAggregatesFilter<"Config"> | string | null
   embed_suc_color?: Prisma.StringWithAggregatesFilter<"Config"> | string
 }
 
@@ -304,6 +316,7 @@ export type ConfigCreateInput = {
   adminRolesId?: string | null
   mmWallet?: string | null
   supportRequestChanId?: string | null
+  tradeRoomChanId?: string | null
   embed_suc_color: string
 }
 
@@ -315,6 +328,7 @@ export type ConfigUncheckedCreateInput = {
   adminRolesId?: string | null
   mmWallet?: string | null
   supportRequestChanId?: string | null
+  tradeRoomChanId?: string | null
   embed_suc_color: string
 }
 
@@ -325,6 +339,7 @@ export type ConfigUpdateInput = {
   adminRolesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mmWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportRequestChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeRoomChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -336,6 +351,7 @@ export type ConfigUncheckedUpdateInput = {
   adminRolesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mmWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportRequestChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeRoomChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -347,6 +363,7 @@ export type ConfigCreateManyInput = {
   adminRolesId?: string | null
   mmWallet?: string | null
   supportRequestChanId?: string | null
+  tradeRoomChanId?: string | null
   embed_suc_color: string
 }
 
@@ -357,6 +374,7 @@ export type ConfigUpdateManyMutationInput = {
   adminRolesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mmWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportRequestChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeRoomChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -368,6 +386,7 @@ export type ConfigUncheckedUpdateManyInput = {
   adminRolesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mmWallet?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supportRequestChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tradeRoomChanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   embed_suc_color?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -379,6 +398,7 @@ export type ConfigCountOrderByAggregateInput = {
   adminRolesId?: Prisma.SortOrder
   mmWallet?: Prisma.SortOrder
   supportRequestChanId?: Prisma.SortOrder
+  tradeRoomChanId?: Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
@@ -394,6 +414,7 @@ export type ConfigMaxOrderByAggregateInput = {
   adminRolesId?: Prisma.SortOrder
   mmWallet?: Prisma.SortOrder
   supportRequestChanId?: Prisma.SortOrder
+  tradeRoomChanId?: Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
@@ -405,6 +426,7 @@ export type ConfigMinOrderByAggregateInput = {
   adminRolesId?: Prisma.SortOrder
   mmWallet?: Prisma.SortOrder
   supportRequestChanId?: Prisma.SortOrder
+  tradeRoomChanId?: Prisma.SortOrder
   embed_suc_color?: Prisma.SortOrder
 }
 
@@ -422,6 +444,7 @@ export type ConfigSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   adminRolesId?: boolean
   mmWallet?: boolean
   supportRequestChanId?: boolean
+  tradeRoomChanId?: boolean
   embed_suc_color?: boolean
 }, ExtArgs["result"]["config"]>
 
@@ -433,6 +456,7 @@ export type ConfigSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   adminRolesId?: boolean
   mmWallet?: boolean
   supportRequestChanId?: boolean
+  tradeRoomChanId?: boolean
   embed_suc_color?: boolean
 }, ExtArgs["result"]["config"]>
 
@@ -444,6 +468,7 @@ export type ConfigSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   adminRolesId?: boolean
   mmWallet?: boolean
   supportRequestChanId?: boolean
+  tradeRoomChanId?: boolean
   embed_suc_color?: boolean
 }, ExtArgs["result"]["config"]>
 
@@ -455,10 +480,11 @@ export type ConfigSelectScalar = {
   adminRolesId?: boolean
   mmWallet?: boolean
   supportRequestChanId?: boolean
+  tradeRoomChanId?: boolean
   embed_suc_color?: boolean
 }
 
-export type ConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "guildId" | "publicLogChanId" | "privateLogChanId" | "adminRolesId" | "mmWallet" | "supportRequestChanId" | "embed_suc_color", ExtArgs["result"]["config"]>
+export type ConfigOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "guildId" | "publicLogChanId" | "privateLogChanId" | "adminRolesId" | "mmWallet" | "supportRequestChanId" | "tradeRoomChanId" | "embed_suc_color", ExtArgs["result"]["config"]>
 
 export type $ConfigPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Config"
@@ -471,6 +497,7 @@ export type $ConfigPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     adminRolesId: string | null
     mmWallet: string | null
     supportRequestChanId: string | null
+    tradeRoomChanId: string | null
     embed_suc_color: string
   }, ExtArgs["result"]["config"]>
   composites: {}
@@ -902,6 +929,7 @@ export interface ConfigFieldRefs {
   readonly adminRolesId: Prisma.FieldRef<"Config", 'String'>
   readonly mmWallet: Prisma.FieldRef<"Config", 'String'>
   readonly supportRequestChanId: Prisma.FieldRef<"Config", 'String'>
+  readonly tradeRoomChanId: Prisma.FieldRef<"Config", 'String'>
   readonly embed_suc_color: Prisma.FieldRef<"Config", 'String'>
 }
     
