@@ -96,7 +96,7 @@ async function handleSubCmds(msg: Message) {
     const chan = await getChan(guild, cmd[2]);
     if (chan === null) throw new Error("Channel not found");
     const cfg = await cfgService.update(id, { supportRequestChanId: cmd[2] });
-  } else if (subCmd === "tradeRoomsChanId") {
+  } else if (subCmd === "tradeRoomChanId") {
     const chan = await getChan(guild, cmd[2]);
     if (chan === null) throw new Error("Channel not found");
     const cfg = await cfgService.update(id, { tradeRoomChanId: cmd[2] });
