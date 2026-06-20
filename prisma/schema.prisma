@@ -27,7 +27,9 @@ enum TradeStatus {
   WAITING
   CONFIRMED
   CANCELLED
+  ROLE_CANCEL
   SUPPORT_REQUEST
+  WALLET_CANCEL
 }
 
 enum InviteStatus {
@@ -89,6 +91,6 @@ model Config {
   privateLogChanId String?
   adminRolesId String?
   mmWallet String?
-
+  supportRequestChanId String?
   embed_suc_color String
 }

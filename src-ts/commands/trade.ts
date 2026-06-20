@@ -22,7 +22,7 @@ import {
     TextChannel,
 } from 'discord.js';
 import { sleep } from '../utils';
-import { ethHttp, waitForTransaction, signAndSend, estimateGas, calcTransactionCost } from "../utils/crypto";
+import { ethHttp, waitForTransaction, signAndSend, estimateGas, calcTransactionCost, calculateFee } from "../utils/crypto";
 import { formatEther, Transaction, TransactionReceipt } from "viem";
 import { createSuccessEmbed, isAdmin } from '../utils/dis';
 import { chang, treasure } from 'viem/chains';
@@ -37,6 +37,7 @@ import 'dotenv/config';
 import { InviteTradeBtnRes, tradeEventEmitter } from '../btnHandlers/invite';
 import { configCache } from '../storage';
 import { Config } from '../generated/prisma/browser';
+import {logger} from "../utils/logger"
 
 enum TradeRole {
     Receiver = "receiver",
@@ -67,7 +68,9 @@ enum TradeStatus {
     CONFIRMED = "CONFIRMED",
     CANCELLED = "CANCELLED",
     WAITING = "WAITING",
-    SUPPORT_REQUEST = "SUPPORT_REQUEST"
+  SUPPORT_REQUEST = "SUPPORT_REQUEST",
+  ROLE_CANCEL = "ROLE_CANCEL",
+    WALLET_CANCEL = "WALLET_CANCEL"
 
 }
 
@@ -89,6 +92,7 @@ const handlers: Record<string, SubcommandFn> = {
         if(target?.id == interaction.member?.user.id) {
             return await interaction.reply({content:"You cannot do this", flags:MessageFlags.Ephemeral} )
         }
+        throw Error("IDK MAN")
 
         // if(target?.user.bot)
         // @ts-ignore
@@ -120,7 +124,9 @@ const handlers: Record<string, SubcommandFn> = {
                 res("")
 
             }catch(e: any) {
-                console.log(e)
+              console.log(e)
+
+              logger.error({ err: e }, 'Unhandled Rejection');
             }
         })
 
@@ -173,10 +179,17 @@ const handlers: Record<string, SubcommandFn> = {
             //   return await interaction.user.send({content:`${target} declined your trade`})
             // }
             // console.log(target)
-            const {roles, channel} = await createTicketChannelAndAskRoles(interaction, target, selectedCoin);
+            const res = await createTicketChannelAndAskRoles(interaction, target, selectedCoin);
 
-
-
+            const channel = res.channel
+            if (res?.roles === undefined || res?.roles === null) {
+                await channel.send({ embeds: [await createSuccessEmbed("Trade canceled", "Both roles were not selected.")] });
+                await tradeService.update({status:TradeStatus.CANCELLED}, channel.id)
+                await sleep(10_000);
+                await channel.delete("Trade was canceled because roles were incomplete.");
+                return;
+            }
+            const roles = res.roles
             const sender = roles[TradeRole.Sender];
             const receiver = roles[TradeRole.Receiver];
             new Promise(async (res) => {
@@ -192,12 +205,7 @@ const handlers: Record<string, SubcommandFn> = {
                 res("")
             })
             // console.log(sender)
-            if (!sender || !receiver) {
-                await channel.send({ embeds: [await createSuccessEmbed("Trade canceled", "Both roles were not selected.")] });
-                await sleep(10_000);
-                await channel.delete("Trade was canceled because roles were incomplete.");
-                return;
-            }
+
 
             await channel.send({
                 content: sender.toString(),
@@ -250,11 +258,14 @@ const handlers: Record<string, SubcommandFn> = {
 
             const receipt: TransactionReceipt = await ethHttp.waitForTransactionReceipt({ hash: tx.hash });
             // const transactionInfo = await getTransactionInfo(tx.hash);
-            const value: number = parseFloat(formatEther(tx.value, "wei"));
+            let value: number = parseFloat(formatEther(tx.value, "wei"));
             console.log("reciever=d ", value, tx.value, typeof(formatEther(tx.value, "wei")), typeof(formatEther(tx.value, "wei")))
             await tradeService.update({received:formatEther(tx.value, "wei")}, channel.id)
             // receipt.status === "success"
             if (receipt.status === "success") {
+
+              // value = BigInt(value) - calculateFee(amountEth, "1741")
+
                 // await tradeService.update({recieved: value}, channel.id)
                 const releaseConfirmed = await askReleaseMoney(
                     channel,
@@ -265,12 +276,13 @@ const handlers: Record<string, SubcommandFn> = {
                     tx.hash,
                     value,
                 );
+              const afterFee = value - calculateFee(value.toString(), 1741)
                 console.log("TRADE STATUS ", releaseConfirmed)
                 if (releaseConfirmed == TradeStatus.CANCELLED) {
-                    await handleCancelMoney(value, senderWallet, channel);
+                    await handleCancelMoney(afterFee, senderWallet, channel);
                     // return;
                 }else if(releaseConfirmed == TradeStatus.CONFIRMED) {
-                    await handleConfirmMoney(value, receiverWallet, channel);
+                    await handleConfirmMoney(afterFee, receiverWallet, channel);
                     // return
                 // }else if(releaseConfirmed == TradeStatus.SUPPORT_REQUEST) {
 
@@ -301,16 +313,16 @@ const handlers: Record<string, SubcommandFn> = {
             });
         } catch (error) {
             console.error("Trade command failed", error);
-
+              logger.error({ err: error }, 'trade fail');
             const payload = {
                 content: "Trade failed unexpectedly. Check logs for details.",
                 flags: MessageFlags.Ephemeral as const,
             };
 
             if (interaction.deferred || interaction.replied) {
-                await interaction.followUp(payload).catch(() => undefined);
+                // await interaction.followUp(payload).catch(() => undefined);
             } else {
-                await interaction.reply(payload).catch(() => undefined);
+                // await interaction.reply(payload).catch(() => undefined);
             }
         }
     },
@@ -426,7 +438,9 @@ async function createTicketChannelAndAskRoles(
     await thread.members.add(user)
     const roles = await askTradeRoles(thread, [currentUser, user], selectedCoin);
     if (!roles) {
+
         await sleep(10_000);
+        await tradeService.update({status:TradeStatus.ROLE_CANCEL}, thread.id)
         await thread.delete("Trade was canceled before role selection completed.");
         return;
     }
@@ -641,7 +655,9 @@ async function getWalletInTries(channel: ForumThreadChannel, member: any, tries:
     }
 
     await channel.send("Too many mistakes, trade is cancelled.");
-    await sleep(5_000);
+    await tradeService.update({status:TradeStatus.WALLET_CANCEL}, channel.id)
+  await sleep(5_000);
+
     await channel.delete("Trade canceled after too many invalid wallet attempts.");
     throw new Error("Trade canceled after too many invalid wallet attempts.");
 }
@@ -732,7 +748,9 @@ async function askReleaseMoney(
                     await tradeService.update({ status:finalResult}, trade.channelId)
 
                 }catch(e: any) {
-                    console.log(e)
+                  console.log(e)
+
+                  logger.error({ err: e }, 'update fail');
                 }
                 await message.edit({ components: [] });
                 collector.stop();

@@ -126,6 +126,8 @@ function checkCfg(cfg: Config) {
     res.push("publocLogChanId")
   if (cfg.privateLogChanId === null)
     res.push("privateLogChanId")
+  if (cfg.supportRequestChanId === null)
+    res.push("supportRequestChanId")
   return res
 }
 

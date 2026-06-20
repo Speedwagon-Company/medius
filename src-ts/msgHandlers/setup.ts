@@ -15,10 +15,11 @@ import * as cfgService from "../services/config";
 const admRoleIds = process.env.OWNERS?.split(",");
 const commads = new Set(["-set", "-help"]);
 const subCmds = new Set([
-  "publicLogChannel",
-  "privateLogChannel",
+  "publicLogChanId",
+  "privateLogChanId",
   "init",
   "mmWallet",
+  "supportRequestChanId"
 ]);
 const prefix = "-";
 
@@ -76,16 +77,20 @@ async function handleSubCmds(msg: Message) {
     });
   }
   const guild = msg.guild;
-  if (subCmd === "publicLogChannel") {
+  if (subCmd === "publicLogChanId") {
     const chan = await getChan(guild, cmd[2]);
     if (chan === null) throw new Error("Channel not found");
     const cfg = await cfgService.update(id, { publicLogChanId: cmd[2] });
-  } else if (subCmd === "privateLogChannel") {
+  } else if (subCmd === "privateLogChanId") {
     const chan = await getChan(guild, cmd[2]);
     if (chan === null) throw new Error("Channel not found");
     const cfg = await cfgService.update(id, { privateLogChanId: cmd[2] });
   } else if (subCmd === "mmWallet") {
     await cfgService.update(id, { mmWallet: cmd[2] });
+  } else if (subCmd === "supportRequestChanId") {
+    const chan = await getChan(guild, cmd[2]);
+    if (chan === null) throw new Error("Channel not found");
+    const cfg = await cfgService.update(id, { supportRequestChanId: cmd[2] });
   }
 }
 

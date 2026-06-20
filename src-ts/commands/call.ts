@@ -5,6 +5,7 @@ import { randomUUID, UUID } from 'node:crypto';
 import { createSuccessEmbed } from '../utils/dis';
 import { trades } from './trade';
 import * as tradeService from "../services/trade"
+import * as cfgService from "../services/config"
 
 type SubcommandFn = (interaction: ChatInputCommandInteraction) => Promise<any>;
 const SUP_REQ_CHAN_ID = "1505282213577490553"
@@ -34,7 +35,9 @@ const handlers: Record<string, SubcommandFn> = {
             reason = "Not given"
         }
         const id = randomUUID()
-        const supportReqChan: any = await interaction.client.channels.fetch(SUP_REQ_CHAN_ID)
+        const cfg = await cfgService.get(interaction.guildId || "")
+
+        const supportReqChan: any = await interaction.client.channels.fetch(cfg.supportRequestChanId || "")
         const row =  buildReqSupportBtn(id)
         const embed = await createSuccessEmbed(`Support request`, `User ${interaction.user.username} requested support \nReason: ${reason}`)
         const message: Message = await supportReqChan.send({ embeds:[embed],components:[row]})

@@ -77,6 +77,30 @@ export function watchMMWalletTrans() {
 })
 }
 
+export function calculateFee(
+  amountEth: string,
+  ethPriceInUSD: number
+): number {
+  const amountInEth = Number(amountEth);
+  const amountInUSD = amountInEth * ethPriceInUSD;
+
+  let feeInUSD: number;
+
+  if (amountInUSD > 250) {
+    feeInUSD = (amountInUSD * 0.01);
+  } else if (amountInUSD >= 50 && amountInUSD <= 249) {
+    feeInUSD = 2;
+  } else {
+    feeInUSD = 0;
+  }
+
+  // Переводим комиссию обратно в ETH
+  const feeInEth = feeInUSD / ethPriceInUSD;
+
+  return feeInEth;
+}
+
+
 export async function waitForTransaction(wallet: string): Promise<Transaction> {
   while(true) {
     const trans = transactions.get(wallet.toLowerCase())
