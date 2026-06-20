@@ -153,32 +153,32 @@ const handlers: Record<string, SubcommandFn> = {
             } else if (status === "trade"){
               return await interaction.followUp({ content: "You already have pending trade", flags: MessageFlags.Ephemeral})
             }
-            // const invite: Invite = await inviteService.create({targetId:target.id, senderId:interaction.user.id})
-            // let row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            //   new ButtonBuilder()
-            //     .setCustomId(`trade_invite_${invite.id}_accept`)
-            //     .setStyle(ButtonStyle.Success)
-            //     .setLabel('Accept'),
-            //   new ButtonBuilder()
-            //     .setCustomId(`trade_invite_${invite.id}_declince`)
-            //     .setStyle(ButtonStyle.Danger)
-            //     .setLabel("Deny")
-            // )
-            // const sentMessage = await target.send({
-            //     embeds:[await createSuccessEmbed("New trade request",`From ${interaction.user}`)],
-            //     components: [row]
-            //   });
+            const invite: Invite = await inviteService.create({targetId:target.id, senderId:interaction.user.id})
+            let row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+              new ButtonBuilder()
+                .setCustomId(`trade_invite_${invite.id}_accept`)
+                .setStyle(ButtonStyle.Success)
+                .setLabel('Accept'),
+              new ButtonBuilder()
+                .setCustomId(`trade_invite_${invite.id}_declince`)
+                .setStyle(ButtonStyle.Danger)
+                .setLabel("Deny")
+            )
+            const sentMessage = await target.send({
+                embeds:[await createSuccessEmbed("New trade request",`From ${interaction.user}`)],
+                components: [row]
+              });
 
 
-            // console.log("STARTED WAITING")
-            // const res: InviteTradeBtnRes = await tradeEventEmitter.waitForResponse(String(invite.id))
-            // row.components.forEach((comp) => comp.setDisabled(true))
-            // await sentMessage.edit({ components: [row] });
-            // console.log("ENDED WAITING")
-            // if (!res.accepted) {
-            //   return await interaction.user.send({content:`${target} declined your trade`})
-            // }
-            // console.log(target)
+            console.log("STARTED WAITING")
+            const res1: InviteTradeBtnRes = await tradeEventEmitter.waitForResponse(String(invite.id))
+            row.components.forEach((comp) => comp.setDisabled(true))
+            await sentMessage.edit({ components: [row] });
+            console.log("ENDED WAITING")
+            if (!res1.accepted) {
+              return await interaction.user.send({content:`${target} declined your trade`})
+            }
+            console.log(target)
             const res = await createTicketChannelAndAskRoles(interaction, target, selectedCoin);
 
             const channel = res.channel

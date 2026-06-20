@@ -47,7 +47,7 @@ export function watchMMWalletTrans() {
   const client = ethHttp
   const unwatch = client.watchBlocks({
   onBlock: async (block) => {
-    console.log(`Новый блок: ${block.number} ${MM_ADDRESS}`)
+    // console.log(`Новый блок: ${block.number} ${MM_ADDRESS}`)
     const blockWithTxs = await client.getBlock({
       blockNumber: block.number,
       includeTransactions: true
