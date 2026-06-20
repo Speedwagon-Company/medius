@@ -472,7 +472,7 @@ async function askCoin(interaction: ChatInputCommandInteraction<"cached">): Prom
             .setPlaceholder("Choose coin")
             .setMinValues(1)
             .setMaxValues(1)
-            .addOptions({ label: "Eth (Sepolia testnet)", value: "ETH", emoji: "🟥" }),
+            .addOptions({ label: "Eth (mainnet)", value: "ETH", emoji: "🟥" }),
     );
 
     await interaction.reply({
